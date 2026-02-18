@@ -1,0 +1,209 @@
+
+
+
+
+\section{Old prelims}
+\label{app:old_prelim}
+
+\subsection{Background on \texorpdfstring{$f$}{f}-DP}
+\label{sec:background}
+
+One way to formalize ``is hard to distinguish'' could be done using hypothesis testing. 
+For two neighbouring datasets $\dataset_0, \dataset_1$: 
+\begin{equation*}
+   \hypothesis_0:  \text{the dataset is $\dataset_0$} \quad 
+\text{versus} \quad 
+  \hypothesis_1: \text{the dataset is $\dataset_1$},
+\end{equation*}
+where the output of the mechanism is the basis for hypothesis testing. 
+
+In other words, an attacker is given $\mechanism(\dataset)$ for $\dataset \in \{\dataset_0, \dataset_1\}$
+and need to reject either $\hypothesis_0$ or $\hypothesis_1$.
+The type I error in this case is incorrectly rejecting $\hypothesis_0$ {\color{blue}given that $D = D_0$} and type II error is incorrectly
+rejecting $\hypothesis_1$ {\color{blue}given that $D = D_1$}.
+We say that $\mechanism$ is $f$-DP if and only if no attacker can simultaneously bound the probability of type I error
+by $\alpha$ and the probability of type II error by $f(\alpha)$. {\color{blue}(Bingshan: upper bound type I error by $\alpha$ and upper bound type II error by $f(\alpha)$? Why we need to have the wording ``probability''? )}
+
+In other words, let us assume $P$ and $Q$ are two distributions over $\mathcal{R}$;
+a rejection rule $0 \le \phi \le 1$ {\color{blue}(Bingshan: how about using $\phi : \mathcal{R} \rightarrow [0,1]$? anyway, we need to use this version when applying Nerman-Pearson lemma)}, with type I and type II error rates defined as
+$\alpha_\phi = \E_{x \sim P}{\phi(x)}$ and $\beta_\phi = 1 - \E_{x \sim Q}{\phi(x)}$.
+
+\begin{lemma}[Neyman-Pearson lemma] Let $P$ and $Q$ be probability distributions on $\mathcal{R}$ with densities $p$ and $q$, respectively. For the hypothesis testing problem $H_0: P \text{ versus } H_1: Q$, a test $\phi : \mathcal{R} \rightarrow [0,1]$ is the most powerful test at level $\alpha$ if and only if there exist two constants\footnote{These two constants can depend on $\alpha$ and distribution-dependent parameters.} $h \in [0, + \infty)$ and $c \in [0,1]$ such that $\phi$ has the form
+\begin{equation}
+     \phi(x) = \begin{cases}
+      1, & \text{if } p(x) < h q(x),\\
+      c, & \text{if }  p(x) = hq(x),\\
+      0, & \text{if } p(x)> hq(x),
+    \end{cases} 
+\end{equation}
+and $\mathbb{E}_{X \sim P}[\phi(X)] = \alpha$.
+    
+\end{lemma}
+
+We say that $P$ and $Q$ are $f$-DP indistinguishable if and only if $\beta_\phi \ge f(\alpha_\phi)$ for any $\phi$. 
+This leads us to a notion of a tradeoff curve.
+\begin{definition}
+    Let $P$ and $Q$ be some distributions over a set $\mathcal{R}$. 
+    The tradeoff curve $T(P, Q) : [0, 1] \to [0, 1]$ is defined as follows: 
+    $T(P, Q)(\alpha) = \inf \{\beta_\phi ~:~ \alpha_\phi \le \alpha\}$,
+    where the infimum is over all rejection rules $\phi$.
+\end{definition}
+
+\begin{proposition}[Proposition 2.2 \citep{DRS22}] A tradeoff curve is convex, continuous, non-increasing, and  symmetric with respect to the line $y=x$. 
+    
+\end{proposition}
+
+
+
+%ADD proposition of tradeoff curves. tradeoff curves T (·, ·), and convex, continuous, symmetric w.r.t y = x. Let T be the set of all tradeoff curves. 
+
+
+    
+
+
+
+
+A randomized mechanism $\mathcal{M}$ induces a distribution over outputs $P_0 \equiv \mathcal{M}(D_0)$ or $P_1 \equiv \mathcal{M}(D_1)$, when running on $D_0$ or $D_1$, respectively.
+\begin{definition}[$f$-differential privacy] Let $f$ be a tradeoff curve. A mechanism $\mathcal{M}$ is said to be $f$-differentially private if 
+\begin{equation*}
+    T(\mathcal{M}(D_0), \mathcal{M}(D_1)) \ge f,
+\end{equation*}
+for all neighbouring datasets $D_0$ and $D_1$.
+\end{definition}
+
+
+ 
+Like other DP notions, the notion of $f$-DP considers any pair of neighbouring datasets $D_0$ and $D_1$, that differ in only one element (or add/remove it doesn't matter). 
+%{\color{blue} (tradeoff curves for identity, approx DP $f_{\epsilon, \delta}$, GDP $G_\mu$, .)}
+%To cover:
+%\begin{itemize}
+    %\item Rejection rules.
+    %\item power, level.
+    %\item tradeoff curves $T(\cdot, \cdot)$, and convex, continuous, symmetric w.r.t $y=x$. 
+%  \item $T(\cdot, \cdot)$ can be realized. construction for distributions realizing tradeoff functions from \cite{DRS22}, Proposition 2.2.
+   % \item tradeoff curves for identity, approx DP $f_{\epsilon, \delta}$, GDP $G_\mu$, approx GDP ($f_{0, \delta} \otimes G_\mu$).
+  %  \item Composition (+ useful properties such as: composition does not depend on the realizer for $f_1$ $f_2$ and $f_1 \otimes f_2 = T(P_0 \times Q_0, P_1 \times Q_1)$ for any realizer).
+   % \item Filters (\Cref{alg:privacy-filter})
+%\end{itemize}
+Let $\cT$ be the set of all tradeoff curves.
+ $\fid \triangleq \alpha \rightarrow 1-\alpha$ is the identity tradeoff curve ($\forall f, \ f \otimes \fid = f$) corresponding to perfect privacy. 
+A tradeoff curve $f$ is always $\leq \fid$. $f$-DP is a generalization of the classic $(\epsilon, \delta)$-DP.
+\begin{proposition}
+    A mechanism $\mathcal{M}$ is $(\epsilon, \delta)$-DP if and only if 
+$\mathcal{M}$ is $f_{\epsilon, \delta}$-DP, where 
+$f_{\epsilon, \delta}(\alpha) = \max \left\{0,1-\delta-e^{\epsilon}\alpha, e^{-\epsilon}(1-\delta-\alpha) \right\}$.    
+\end{proposition}
+
+\begin{definition}
+    A mechanism $\mathcal{M}$ is said to be $\mu$-GDP if
+    \begin{equation*}
+        T(\mathcal{M}(D_0), \mathcal{M}(D_1)) \ge T(\mathcal{N}(0,1), \mathcal{N}(\mu, 1)),
+    \end{equation*}
+    for all neighbouring datasets $D_0$ and $D_1$.
+\end{definition}
+Let $G_{\mu} := T(\mathcal{N}(0,1), \mathcal{N}(\mu, 1))$. Then, we have $G_{\mu}(\alpha) = \Phi(\Phi^{-1}(1-\alpha)-\mu)$.
+%{\color{magenta}(Bingshan: perfect DP means $(0,0)$-DP.)}
+
+
+
+\begin{proposition}[Proposition~2.2 \citep{dong2022gaussian}]\label{prop:tf-distr} For any tradeoff curve $f \in \mathcal{T}$, there exist a pair of distributions $P, Q$ over a common measurable space such that $f = T(P, Q)$.
+\end{proposition}
+% \begin{proposition}[Proposition~2.2 \citep{dong2022gaussian}]\label{prop:tf-distr}
+%     \[
+%         \forall f \in \cT, \ \exists P, Q \ \textrm{s.t.} \ f = T(P, Q).
+%     \] 
+% \end{proposition}
+\begin{proof}
+   The common measurable space is the unit interval $[0,1]$, and the common measure $\nu$ is the uniform over $[0,1]$ with a point-mass at $1$.
+   Let $P$ be the uniform distribution over $[0,1]$. Let  $Q$ be a distribution over $[0,1]$ having the following density function:
+\begin{equation}
+     q(x) = \begin{cases}
+      -f'(1-x), & \text{if } x \in [0,1) \ \text{and} \ f' \ \text{exists},\\
+      (1-f(0)) \cdot \delta(x-1), & \text{if }  x = 1.
+    \end{cases} 
+    \label{eq: density}
+\end{equation}
+Since $f$ is convex, $f'$ exists almost everywhere $\int_{0}^1 q(x) d\nu(x)  =\int_{0}^1 (-f'(1-x)) d\nu(x) + 1 - f(0) = f(0)-f(1)+1-f(0) = 1$, the function shown in  (\ref{eq: density}) is indeed a probability density function. Without loss of generality, we assume that all $-f'(1-x)$ are distinct.
+Now, we construct  a test $P \text{ vs } Q$.
+For any $\alpha \in [0,1]$,
+%we let $1 = h \cdot q(1-\alpha)$. 
+the optimal rejection rule is
+\begin{equation}
+     \phi(x) = \begin{cases}
+      1, & \text{if } x \ge 1-\alpha ,\\
+      0, & \text{if } x < 1-\alpha.
+    \end{cases} 
+\end{equation}
+Then, we have $\mathbb{E}_{P}[\phi] = \alpha$ and $T(P,Q)(\alpha) = 1- \mathbb{E}_{Q}[\phi]  = 1- \left(\int_{1-\alpha}^{1} (-f'(1-x)) dx + 1 - f(0)\right) = f(\alpha)$, which concludes the proof. \end{proof}
+
+
+
+
+\subsection{Background on composition and differential privacy filters}
+
+\todo{maybe something saying that strong composition is implied by $f$-DP composition so when we have free filters we also have free strong composition filters. Add something similar for privacy loss distribution?}
+
+\begin{enumerate}
+    \item Worst-case composition (basic composition): Composition (+ useful properties such as: composition does not depend on the realizer for $f_1$ $f_2$ and $f_1 \otimes f_2 = T(P_0 \times Q_0, P_1 \times Q_1)$ for any realizer). Add $(\epsilon, \delta)$-DP composition and GDP composition. approx GDP ($f_{0, \delta} \otimes G_\mu$)
+
+    \item Adaptive composition: Filters (\Cref{alg:privacy-filter}). ADD GDP adaptive composition. 
+
+
+\end{enumerate}
+\subsection{Notations, definitions, and useful properties}
+\label{sec:background-results}
+
+Given a set of tradeoff curves $\cF$, we will note $\cF^k = \{ f_1 \otimes \cdots \otimes f_k : f_1, \ldots, f_k \in \cF \}$ the set of tradeoff curves we obtain under $k$ compositions of functions in $\cF$. We note $\cF^\infty = \lim_{k\rightarrow\infty} \cF^k$. Notice that as long as $\fid \in \cF$, we have $\cF^k \subseteq \cF^{k+1}$.
+\ml{I might be making the assumption $\fid \in \cF$ in some places, hence the note below to maybe say $\cF \cup \{f_{\textrm{id}}\}$. Maybe we should add it (if useful). Leaving this not to forget.}
+Our study relies on properties of the lower-convex envelope of a set of tradeoff curves:
+
+\begin{definition}[Lower-convex envelope]
+    We call $\conv$ the lower-convex envelope operator. That is, for any set of tradeoff curves $\cF$, we have:
+    \[
+        \conv(\cF)(\alpha) = \sup \big\{ g(\alpha) : \textrm{g is convex and } \forall f \in \cF, \ g \leq f \big\}
+    \]
+\end{definition}
+% {\color{red}(Bingshan: the above definition is so weird. How about this way?
+% \begin{equation}
+%     \conv(\cF) = \sup \big\{ g : \textrm{g is convex and } \forall f \in \cF, \forall \alpha \in [0,1], \ g(\alpha) \leq f(\alpha) \big\}
+% \end{equation}
+% )}
+
+{\color{red}This lower-convex envelope has XXX properties that will be useful to prove our main results.}
+\begin{proposition}\label{prop:convex-bridge-two-point-support}
+For any set of tradeoff curves $\cF$, for all $\alpha \in [0, 1]$, there exists $f_1, f_2 \in \cF$, $x_1, x_2 \in [0,1]$, and $w \in [0, 1]$ such that:
+\[
+    \conv(\cF)(\alpha) = w f_1(x_1) + (1-w) f_2(x_2) .
+\]
+\end{proposition}
+\begin{proof}    \ml{TODO: should be straightforward but not sure how to write it concisely yet. Seemed like Carathéodory's theorem but not quite.}. {\color{red}(Bingshan: Page 74 in \cite{DRS22} ).}
+\end{proof}
+
+
+\begin{proposition}[One-step convex combination]
+\label{prop:one-step-convex-combination}
+Consider a set of tradeoff curves $\cF$, and an adversary $\cA$ that picks any $f\in\cF$ and receives $m \sim \cM$ for any $f$-DP $\cM$. $\cA$'s view is $\conv(\cF)$-DP.
+\end{proposition}
+\begin{proof}
+    $\forall f \in \cF, \ f \geq \conv(\cF)$. 
+    \ml{TODO:convex combination of $f$'s in the expectation and we're good}
+
+%    {\color{blue}Bingshan: because $\conv(\cF)$ is always below any $f \in \mathcal{F}$.}
+\end{proof}
+
+{\color{blue}(Bingshan: here, I suggest adding a definition for the piecewise-linear tradeoff curves, i.e., a tradeoff curve that is made up of multiple, straight-line segments, where each segment is defined on a specific interval.) } The composition of tradeoff curves is challenging to compute in general, 
+but piecewise-linear tradeoff curves (which include  all $(\epsilon, \delta)$-DP mechanisms) 
+admit a closed form algorithm. 
+\ml{
+    This is obvious I think, but I haven't seen it in that form before. 
+    Probably the same a the "optimal composition" papers. Maybe we can point this out and cite? \citep{murtagh2015complexity,kairouz2015composition}
+}
+This algorithm is not efficient 
+\ml{
+    in fact this is hard in the general case, same paper(s) as comment right above
+}, 
+but tractable in simple cases. 
+We will leverage this result for illustrative numerical examples, to show counter-examples, 
+and in a result on $(\epsilon, \delta)$-DP.
+
+

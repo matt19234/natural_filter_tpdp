@@ -1,0 +1,129 @@
+\section{Characterizing the Natural Filter}
+\label{sec:natural_filter_characterization}
+
+Our goal is to study when the natural filter \Cref{alg:natural_filter} with budget $B$ and queries in $\cL$ comes at no additional privacy cost, i.e. the mechanism induced by the interaction between the filter and an adversarial analyst itself has privacy bounded by $B$. In this case, we say that the natural filter is free. We will write $B \ominus L := \sup\{L' : L \oplus L' \preceq B\}$ so that $L' \preceq B \ominus L$ exactly when $L \oplus L' \preceq B$. We also write $\cL_{\preceq B} := \{L \in \cL : L \preceq B\}$ to denote the queries in $\cL$ dominated by $B$. For simplicity, we will assume that $\Iddist \in \cL$.
+
+\begin{algorithm}[tb]
+	\caption{NaturalFilter}
+	\label{alg:natural_filter}
+	\begin{algorithmic}
+		\REQUIRE Privacy budget $B$, adversary (or analyst) $\cA$, family of allowed PLDs $\cL$, query capacity $k$
+		\STATE $i=0$
+		\WHILE{$\cA$ continues and $i < k$}
+		\STATE $i \leftarrow i+1$
+		\STATE $\cA$ gives mechanism $\cM_i$ that has PLD $L_i \in \cL$ \algcomment{can depend on previous results $Y_{<i}$}
+		\IF{$L_1 \oplus \dots \oplus L_i \preceq B$}
+		\STATE $\cA$ receives $Y_i \sim \cM_i$
+		\ENDIF
+		\ENDWHILE
+		\RETURN $(Y_1, \ldots, Y_i)$
+	\end{algorithmic}
+\end{algorithm}
+
+Now, notice that the natural filter \Cref{alg:natural_filter} with budget $B$ and $k$ queries in $\cL$ is free exactly when $\pld(\Filter_{\cL, B, k}) \preceq B$ where
+\begin{align*}
+	\Filter_{\cL, B, k}(L_1, \dots, L_{k'})
+		:= \cL_{\preceq B \ominus L_1 \dots \ominus L_{k'}}
+		= \{L_{k' + 1} \in \cL : L_1 \oplus \dots \oplus L_{k'} \oplus L_{k' + 1} \preceq B\}
+\end{align*}
+for $0 \leq k' < k$. In particular, by applying \Cref{lemma:restricted_adversary} to the rule $\Filter_{\cL, B, k}$ we immediately get the following characterization.
+
+\begin{theorem}
+	\label{thm:free_natural_filter}
+	Let $\cL$ be a family of PLDs, let $B$ be a PLD, and let $k$ be a positive integer. For any $L_1, \dots, L_{k'} \in \cL$ ($0 \leq k' < k$) such that $L_1 \oplus \dots \oplus L_{k'} \preceq B$, let
+	\begin{align*}
+		V_{k - k'}(L_1, \dots, L_{k'}) := \sup\{L_{k' + 1} \oplus V_{k - (k' + 1)}(L_1, \dots, L_{k' + 1}) : L_{k' + 1} \in \cL_{B \ominus L_1 \ominus \dots \ominus L_{k'}}\}
+	\end{align*}
+	where $V_0(L_1, \dots, L_k) := \Iddist$. The natural filter \cref{alg:natural_filter} for $k$ queries in $\cL$ with budget $B$ is free if and only if $V_k(\lambda) \preceq B$.
+	% The natural filter \cref{alg:natural_filter} for $k$ queries in $\cL$ with budget $B$ is free if and only if $\cL$ and $B$ satisfy the following property:
+	% \begin{align*}
+	% 	\sup\{L_1 \oplus \sup\{L_2 \oplus \dots\sup\{L_k : L_k \in \cL_{\preceq B \ominus L_1 \ominus \dots \ominus L_{k - 1}}\} \dots : L_2 \in \cL_{\preceq B \ominus L_1}\} : L_1 \in \cL_{\preceq B}\} \preceq B.
+	% \end{align*}
+\end{theorem}
+
+Informally, $V_{k - k'}(L_1, \dots, L_{k'})$ is the maximal remaining privacy cost of an adversary that has already played moves $L_1, \dots, L_{k'}$. Naturally, when the adversary has already selected all of its moves, the remaining privacy cost is $\Iddist$, i.e. nothing.
+
+It is also of interest to understand when a given family of queries $\cL$ simultaneously admits free natural filters against an arbitrary budget $B$. We show that this is the case exactly when the supremum commutes with the convolution operator.
+
+\begin{theorem}
+	\label{thm:universal_free_natural_filter}
+	Fix a family of PLDs $\cL$. The natural filter \Cref{alg:natural_filter} is free for every budget $B$ simultaneously and query capacity $k$ if and only if $\cL$ has the following property:
+	\begin{align*}
+		\forall L \in \cL \ \textrm{and} \ \cL' \subseteq \cL^{<k} \quad
+			L \oplus \sup{\cL'} = \sup\{L \oplus L' : L' \in \cL'\}.
+	\end{align*}
+\end{theorem}
+
+\begin{proof}
+	First, assume that the natural filter is free for every budget $B$ and for any query capacity. Now, let $L \in \cL$ and $\cL' \subseteq \cL^{<k}$. For every $L' \in \cL'$, we have $L \oplus L' \preceq L \oplus L \oplus \sup{\cL'}$ by \Cref{prop:pld_convolution_properties} and hence $\sup\{L \oplus \cL'\} \preceq L \oplus \sup{\cL'}$. As for the reverse inequality, consider the rule
+	\begin{align*}
+		\Gamma(\lambda) := \{L\} \quad\quad \Gamma(L) := \cL'
+	\end{align*}
+	of length $2$ and the budget $B := \sup(L \oplus \cL')$. Now, for any $M \in \Adv(\Gamma)$, notice that we can transform $M$ into $M' \in \Adv(\Filter_{\cL, B, k})$ such that $\pld(M) = \pld(M')$. Indeed, let $M = M_1 \oplus M_2 \in \Adv(\Gamma)$ and fix $y_1 \in \cY_1$ so that we have that $\pld(M_2(\cdot; y_1)) = L_1 \oplus \dots \oplus L_{k - 1} \in \cL^{< k}$. For each $L_i$, we can find a mechanism $M^i$ with $\pld(M^i) = L_i$. Now, set $M'_2(\cdot ; y_1) := M^1 \otimes \dots \otimes M^{k - 1}$ so that $\pld(M'_2(\cdot; y_1)) = L_1 \oplus \dots \oplus L_{k'} = \pld(M_2(\cdot; y_1))$. Clearly, $M' := M_1 \otimes M'_2 \in \Adv(\Filter_{\cL, B, k})$ and, by \Cref{prop:composition_convolution}, we have $\pld(M) = \pld(M')$, so by \Cref{lemma:restricted_adversary} and since the natural filter is free for $B$ by assumption, we have
+	\begin{align*}
+		L \oplus \sup{\cL'}
+			= \sup_{M \in \Adv(\Gamma)} \pld(M)
+			\preceq \sup_{M' \in \Adv(\Filter_{\cL, B, k})} \pld(M')
+			\preceq B
+			= \sup\{L \oplus \cL'\}.
+	\end{align*}
+
+	On the other hand, assume that convolution commutes with supremum in $\cL^\infty$. Let $B$ be any budget and let $k$ be a positive integer. With an eye toward \Cref{thm:free_natural_filter}, we claim that the maximal remaining privacy cost of an adversary that has selected some if its moves already satisfies
+	\begin{align*}
+		V_{k - k'}(L_1, \dots, L_{k'}) = \sup\{L_{k' + 1} \oplus \dots \oplus L_k : L_{k' + 1}, \dots, L_k \in \cL, \oplus_{i = 1}^k L_i \preceq B\}
+	\end{align*}
+	for $0 \leq k' < k$. Indeed,
+	\begin{align*}
+		V_1(L_1, \dots, L_{k - 1})
+			& = \sup\{L_k \oplus V_0(L_1, \dots, L_k) : L_k \in \cL, \oplus_{i = 1}^k L_i \preceq B\} \\
+			& = \sup\{L_k : L_k \in \cL, \oplus_{i = 1}^k L_i \preceq B\}
+	\end{align*}
+	and, if the claim holds for $k'$, then
+	% \begin{align*}
+	% 	V&_{k - k' + 1}(L_1, \dots, L_{k' - 1}) \\
+	% 		& = \sup\{L_{k'} \oplus V_{k - k'}(L_1, \dots, L_{k'}) : L_{k'} \in \cL, L_1 \oplus \dots \oplus L_{k'} \preceq B\} \\
+	% 		& = \sup\{L_{k'} \oplus \sup\{L_{k' + 1} \oplus \dots \oplus L_k : L_{k' + 1}, \dots, L_k \in \cL, L_1 \oplus \dots \oplus L_k \preceq B\} : L_{k'} \in \cL, L_1 \oplus \dots \oplus L_{k'} \preceq B\} \\
+	% 		& = \sup\{\sup\{L_{k'} \oplus L_{k' + 1} \oplus \dots \oplus L_k : L_{k' + 1}, \dots, L_k \in \cL, L_1 \oplus \dots \oplus L_k \preceq B\} : L_{k'} \in \cL, L_1 \oplus \dots \oplus L_{k'} \preceq B\} \\
+	% 		& = \sup\{L_{k'} \oplus \dots \oplus L_k : L_{k'}, \dots, L_k \in \cL, L_1 \oplus \dots \oplus L_k \preceq B\}
+	% \end{align*}
+	\begin{align*}
+		V&_{k - (k' - 1)}(L_1, \dots, L_{k' - 1}) \\
+			& = \sup\{L_{k'} \oplus V_{k - k'}(L_1, \dots, L_{k'}) : L_{k'} \in \cL, \oplus_{i = 1}^{k'} L_i \preceq B\} \\
+			& = \sup\{L_{k'} \oplus \sup\{L_{k' + 1} \oplus \dots \oplus L_k : L_{k' + 1}, \dots, L_k \in \cL, \oplus_{i = 1}^k L_i \preceq B\} : L_{k'} \in \cL, \oplus_{i = 1}^{k'} L_i \preceq B\} \\
+			& = \sup\{\sup\{L_{k'} \oplus L_{k' + 1} \oplus \dots \oplus L_k : L_{k' + 1}, \dots, L_k \in \cL, \oplus_{i = 1}^k L_i \preceq B\} : L_{k'} \in \cL, \oplus_{i = 1}^k L_i \preceq B\} \\
+			& = \sup\{L_{k'} \oplus \dots \oplus L_k : L_{k'}, \dots, L_k \in \cL, \oplus_{i = 1}^k L_i \preceq B\}
+	\end{align*}
+	and the claim holds by induction. In particular,
+	\begin{align*}
+		V_k(\lambda)
+			= \sup\{L_1 \oplus \dots \oplus L_k : L_1, \dots, L_k \in \cL, L_1 \oplus \dots \oplus L_k \preceq B\}
+			\preceq B
+	\end{align*}
+	and so the natural filter is free for $k$ queries in $\cL$ with budget $B$ by \Cref{thm:free_natural_filter}.
+\end{proof}
+
+Our key result is that that this commutativity condition can essentially only be satisfied for family of queries $\cL$ whose closure under composition $\cL^\infty$ is well-ordered.
+
+\begin{theorem}
+	\label{thm:well_ordering}
+	Fix a family of non-degenerate PLDs $\cL$, i.e. every $L \in \cL$ is supported at at least two points in $\bR$. The natural filter \Cref{alg:natural_filter} is free for every budget $B$ and every query capacity $k$ if and only if $\cL^\infty$ is well-ordered with respect to $\preceq$.
+\end{theorem}
+
+We prove here that families of queries that are well-ordered under composition satisfy the commutativity condition. The proof of the other direction is significantly more involved, so we delay it until \Cref{sec:well_ordering_proof}.
+
+\begin{proof}[Proof of Sufficient Condition for \Cref{thm:well_ordering}]
+	Assume that $\cL^\infty$ is well-ordered and let $L \in \cL, \cL' \subseteq \cL^{< k} \subseteq \cL^\infty$. For convenience, we will denote by $h_L$ the unique hockey-stick curve associated to a PLD $L$, namely $h_L(x) = \E_{Z \sim L}[(1 - xe^{-Z})_+]$ (see \Cref{prop:pld_to_hs}). Now, as in the proof of \Cref{thm:universal_free_natural_filter}, we already have $\sup\{L \oplus \cL'\} \preceq L \oplus \sup{\cL'}$ for free, so due to \Cref{prop:sup-conv}, we just need to show that $h_{L \oplus \sup{\cL'}} \preceq h_{\sup\{L \oplus \cL'\}}$. To that end, let $\gamma > 0$. By well-ordering of $\cL'$ and by \Cref{prop:sup-conv}, we can find some $L' \in \cL'$ so that $h_{\sup{\cL'}} \preceq h_{L'} + \gamma$. In this case, we have
+	\begin{align*}
+		h_{L \oplus \sup{\cL'}}(x)
+			& = \E_{Z \sim L}[\E_{Z' \sim \sup{\cL'}}[(1 - xe^{-(Z + Z')})_+]] \\
+			& = \E_{Z \sim L}[h_{\sup{\cL'}}(xe^{-Z})] \\
+			& \leq \E_{Z \sim L}[h_{L'}(xe^{-Z}) + \gamma] \\
+			& = \E_{Z \sim L}[\E_{Z' \sim L'}[(1 - xe^{-(Z + Z')})_+]] + \gamma \\
+			& = h_{L \oplus L'}(x) + \gamma \\
+			& \leq h_{\sup\{L \oplus L'\}}(x) + \gamma
+	\end{align*}
+	for any $x \in \bR^\times$, which yields the desired result as $\gamma$ was arbitrary.
+\end{proof}
+
+% \todo{tie this in more clearly to key thesis.}\todo{add counterexample from email chain}.
+% Note that the non-degeneracy condition is essential as the following counterexample demonstrates 

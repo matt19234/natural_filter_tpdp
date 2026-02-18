@@ -1,0 +1,279 @@
+\section{A Proof of \Cref{thm:well_ordering}}
+\label{sec:well_ordering_proof}
+
+% \matt{integrate into \Cref{sec:natural_filter_characterization}??}
+
+In this section, we give a proof of \Cref{thm:well_ordering} that goes through the topology of hockey-stick curves.
+
+As we have seen, \Cref{thm:well_ordering} can be proved by showing that, for any family $\mathcal{F}$ that is not well-ordered, we can find $g_1, g_2 \in \mathcal{F}^\infty$ for which
+\begin{align*}
+    g_1 \otimes \conv\{g_1, g_2\} \prec \conv\{g_1 \otimes g_1, g_1 \otimes g_2\}
+\end{align*}
+Equivalently, in the language of PLDs, we would like to show that if $L_1$ and $L_2$ are not well-ordered, then $L_1 \oplus \sup\{L_1, L_2\} \succ \sup\{L_1 \oplus L_1, L_1 \oplus L_2\}$.
+
+Our first step is to show that gaps between PLDs can be amplified in some sense by composition. For a distribution $A$ in the reals, we denote by $\supp(A) := \{t \in \mathbb{R} : \forall \text{open } U \ni t, A(U) > 0\}$ the support of $A$, namely the points with locally positive probability mass. It turns out that any PLD whose support can be shifted to hit gaps between other PLDs causes the gaps to align when composed.
+
+\begin{proposition}[PLD Gap Amplification]
+    \label{prop:pld_gap_amplification}
+    Let $A, B, B_1, B_2$ be PLDs so that $B_i \prec B$
+    with $h_{B_i}(e^{\varepsilon_i + u}) < h_B(e^{\varepsilon_i + u})$ for some $\varepsilon_1, \varepsilon_2 \in \supp(A)$ and some $u \in \mathbb{R}$. Then
+    \begin{align*}
+        A \oplus B \succ \sup\{A \oplus B_1, A \oplus B_2\}.
+    \end{align*}
+\end{proposition}
+
+\begin{proof}
+    First, it is clear that $A \oplus B \succeq \sup\{A \oplus B_1, A \oplus B_2\}$, so we just need to find a single gap.
+
+    To that end, by continuity, we can find a constant $\rho > 0$ s.t $\inf_{\varepsilon \in (\varepsilon_i + u \pm \rho)} h_B(e^\varepsilon) - h_{B_i}(e^\varepsilon) > 0$. Now, set $\varepsilon^\star := \varepsilon_1 + \varepsilon_2 + u$ and notice that
+    \begin{align*}
+        h_{A \oplus B}(e^{\varepsilon^\star}) - h_{A \oplus B_i}(e^{\varepsilon^\star})
+            & = \mathbb{E}_{Z \sim A \oplus B}[(1 - e^{\varepsilon^\star - Z})_+] - \mathbb{E}_{Z \sim A \oplus B_i}[(1 - e^{\varepsilon^\star - Z})_+] \\
+            & = \mathbb{E}_{Z_1 \sim A}[\mathbb{E}_{Z_2 \sim B}[(1 - e^{(\varepsilon^\star - Z_1) - Z_2})_+] - \mathbb{E}_{Z_2 \sim B_i}[(1 - e^{(\varepsilon^\star - Z_1) - Z_2})_+]] \\
+            & = \mathbb{E}_{Z \sim A}[h_B(e^{\varepsilon^\star - Z}) - h_{B_i}(e^{\varepsilon^\star - Z})] \\
+            & \geq \mathbb{P}_{Z \sim A}(Z \in (\varepsilon_{2 - i} \pm \rho)) \cdot \inf_{\varepsilon \in (\varepsilon_{2 - i} \pm \rho)} h_B(e^{\varepsilon_1 + \varepsilon_2 + u - \varepsilon}) - h_{B_i}(e^{\varepsilon_1 + \varepsilon_2 + u - \varepsilon}) \\
+            & = \mathbb{P}_{Z \sim A}(Z \in (\varepsilon_{2 - i} \pm \rho)) \cdot \inf_{\varepsilon \in (\varepsilon_i + u \pm \rho)} h_B(e^\varepsilon) - h_{B_i}(e^\varepsilon) \\
+            & > 0.
+    \end{align*}
+    In particular,
+    $h_{\sup\{A \oplus B_1, A \oplus B_2\}}(e^{\varepsilon^\star}) = \max\{h_{A \oplus B_1}(e^{\varepsilon^\star}), h_{A \oplus B_2}(e^{\varepsilon^\star})\}
+        < h_{A \oplus B}(e^{\varepsilon^\star})$.
+    % \begin{align*}
+    %     h_{\sup\{A \oplus B_1, A \oplus B_2\}}(e^{\varepsilon^\star}) = \max\{h_{A \oplus B_1}(e^{\varepsilon^\star}), h_{A \oplus B_2}(e^{\varepsilon^\star})\}
+    %     < h_{A \oplus B}(e^{\varepsilon^\star}).
+    % \end{align*}
+\end{proof}
+
+In order to apply gap amplification to PLDs that are not well-ordered i.e. $L_1, L_2 \prec \sup\{L_1, L_2\}$, we would like to reduce the problem to geometric and topological properties of convex curves over $\bR^\times := (0, \infty)$. To that end, we also notice that the support of a PLD is determined by the topology of its hockey-stick curve. This result follows immediately from \Cref{prop:pld_to_hs}
+
+\begin{proposition}
+    \label{prop:support_conversion}
+    For a PLD $L$ with hockey-stick curve $h_L$, denote by $\supp(h_L) := \{x \in \bR^\times : \forall \text{open }U \ni x, h|_U \text{ is not affine}\}$ the points at which $h_L$ ``bends''. Then for any $e^\varepsilon \in \supp(h_L)$, we have $\varepsilon \in \supp(L)$.
+\end{proposition}
+
+% \begin{proof}
+%     \todo{appeal to $h_L(x) = \mathbb{E}_{Z \sim L}[(1 - x e^{-Z})_+]$.}
+% \end{proof}
+
+Our problem is now purely geometric. Given decreasing, convex, unordered curves $h_1, h_2 : \bR^\times \to [0, 1]$ that meet in the limit $x \to 0$, we would like to show that one of them can be scaled along the x-axis so that its elbows hit a region where $h_1 < h_2$ and another region where $h_1 > h_2$.
+
+We proceed by analysis of these regions' topology within the ambient space $\bR^\times$. Given $S \subseteq \bR^\times$, let $\partial S$ denote its boundary, i.e. those points whose neighbourhoods meet both $S$ and $S^C := \bR^\times \setminus S$, let $\mathrm{int}(S) := S \setminus \partial S$ denote its interior, and let $\overline{S} := S \cup \partial S$ denote its closure. Now, let
+\begin{align*}
+    X(h_1, h_2) := \{x \in \bR^\times : h_1(x) < h_2(x)\},
+\end{align*}
+let $X(h_2, h_1)$ be defined similarly, and let $E(h_1, h_2) := (X(h_1, h_2) \cup X(h_2, h_1))^C$ be the points where $h_1$ and $h_2$ agree. Note that, convex curves over $\bR^\times$ are also continuous, so $X(h_1, h_2)$ and $X(h_2, h_1)$ are both open and $E(h_1, h_2)$ is closed. Finally, let
+\begin{align*}
+    C(h_1, h_2) := \{x \in \bR^\times : (x r^{-1}, x) \subseteq X(h_1, h_2), (x, x r) \subseteq X(h_2, h_1) \text{ or vice-versa for some } r > 1\}
+\end{align*}
+denote the \textit{simple} crossing points of $h_1$ and $h_2$. We would like to show that either $\supp(h_1)$ or $\supp(h_2)$ ``links'' $X(h_1, h_2)$ with $X(h_2, h_1)$ in the following sense.
+
+\begin{definition}
+    For subsets $S, T_1, T_2$ of $\bR^\times$, we say that $S$ (multiplicatively) links $T_1$ and $T_2$ if there is $c > 0$ so that $c \cdot S \cap T_1 \neq \varnothing$ and $c \cdot S \cap T_2 \neq \varnothing$. Furthermore, for $S, T \subseteq \bR^\times$, we say that $S$ divides $T$, written $S \mid T$, if $S$ does not link $T$ and $T^C$.
+\end{definition}
+
+In some cases, it will be easier to directly link a set with the boundary of another set. The following lemma shows that this will suffice for our purposes.
+
+\begin{lemma}
+    \label{lemma:closure_linkage}
+    Let $S, U_1, U_2 \subseteq \bR^\times$ with $U_1$ and $U_2$ open. The following are equivalent.
+    \begin{enumerate}[(i)]
+        \item $S$ links $U_1$ and $U_2$
+        \item $S$ links $U_1$ and $\overline{U_2}$
+        \item $S$ links $\overline{U_1}$ and $U_2$
+    \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+    Clearly, (i) implies (ii) and (iii). Moreover, (ii) and (iii) are symmetric, so we just need to show (ii) $\implies$ (i). To that end, assume that there is $x_1, x_2 \in S$ and $c > 0$ such that $cx_1 \in U_1$ and $cx_2 \in \overline{U_2}$. Now, if $cx_2 \in U_2$, we are done, so assume $cx_2 \in \partial U_2$. That is, any arbitrarily small neighbourhood of $cx_2$ meets $U_2$, so, since $U_1 \ni cx_1$ is open, we can just choose $c' > 0$ sufficiently close to $c$ so that $c'x_1$ remains in $U_1$ and $c'x_2 \in U_2$.
+\end{proof}
+
+Critically, non-trivial closed and divisible subsets of $\bR^\times$ have a highly regular multiplicative structure enclosed byt their divisors.
+
+\begin{proposition}
+    \label{prop:dense_subgroup}
+    Let $S \subseteq \bR^\times$ contain more than one point and let $\varnothing \subsetneq T \subsetneq \bR^\times$ be closed. Then, if $S \mid T$, there is $a > 1$ and $B \subseteq [1, a)$ such that $T = a^\bZ B = \{a^k b : k \in \bZ, b \in B\}$ and such that $a \leq s'/s$ for any $s < s' \in S$.
+\end{proposition}
+
+\begin{proof}
+    We first claim that $(s'/s)^\bZ T \subseteq T$ for any $s, s' \in S$. Indeed, let $t \in T$ and $s, s' \in S$. Then $t/s \cdot S \ni t/s \cdot s = t$ meets $T$, so, since $S \mid T$, we must have $T \supseteq t/s \cdot S \ni t/s \cdot s' = (s'/s) \cdot t$. By swapping $s$ and $s'$, we get that $(s'/s)^{-1} \cdot t \in T$ as well. Repeating inductively, we get that $(s'/s)^k \cdot t \in T$ for arbitrary $k \in \bZ$ as desired.
+
+    Now, let $a := \inf\{s'/s : s < s' \in S\}$. Then there is a sequence $a_n := s'_n/s_n \to a$ for some $s_n < s'_n \in S$. By the preceding claim, we have $T = \overline{T} \supseteq \overline{\bigcup_{n \in \bN} a_n^\bZ \ T}$. We claim that $a > 1$. Indeed, if $a = 1$, then $a_n^\bZ T$ forms a cover of $\bR^\times$ with maximum multiplicative distance $a_n \to 1$, so $\bigcup_{n = 1}^\infty a_n^\bZ T$ must be dense in $\bR^\times$, which forces $T = \bR^\times$, whereas we assumed otherwise. Therefore $a > 1$ and
+    \begin{align*}
+        T \supseteq \overline{\bigcup_{n \in \bN} a_n^\bZ T}
+          = \overline{\bigcup_{k \in \bZ} \bigcup_{t \in T} \{a_n^k t : n \in \bN\}}
+          \supseteq \bigcup_{k \in \bZ} \bigcup_{t \in T}\overline{\{a_n^k t : n \in \bN\}}
+          \supseteq \bigcup_{k \in \bZ} \bigcup_{t \in T} \{a^k t\}
+          = a^\bZ T.
+    \end{align*}
+    Finally, let $B := T \cap [1, a)$. For any $t \in T$, we can choose $k \in \bZ$ so that $a^k t \in [1, a)$ and, furthermore, $a^k t \in a^\bZ T \subseteq T$, so in fact $b := a^k t \in B$ and thus $t = a^{-k} a^k t = a^{-k} b \in a^\bZ B$. That is, $T \subseteq a^\bZ B \subseteq a^\bZ T \subseteq T$.
+\end{proof}
+
+We also require a slight variation on the usual characterization of convexity: a concave curve that passes above and then below a convex curve must remain below it.
+
+\begin{lemma}
+    \label{lemma:convex_vs_affine}
+    Let $f, g : (a, b) \to \bR$ so that $f$ is convex and $g$ is concave. Then, if $f(x_1) \geq g(x_1)$ and $f(x_2) \leq g(x_2)$ for some $x_1 < x_2 \in (a, b)$, then we have $f(x) \geq g(x)$ for all $x \in (a, x_1)$.
+\end{lemma}
+
+\begin{proof}
+    Suppose we could find $x \in (a, x_1)$ with $f(x) < g(x)$. Then, by convexity of $f$ and concavity of $g$ over $[x, x_2]$, we have
+    \begin{align*}
+        f(x_1)
+            \leq \frac{x_2 - x_1}{x_2 - x}\underbrace{f(x)}_{< g(x)} + \frac{x_1 - x}{x_2 - x} \underbrace{f(x_2)}_{\leq g(x_2)}
+            < \frac{x_2 - x_1}{x - x_2} g(x) + \frac{x_1 - x}{x - x_2} g(x_2)
+            \leq g(x_1),
+    \end{align*}
+    which is a contradiction.
+\end{proof}
+% \pasin{Can't the above be directly seen from $f(x) - g(x)$ being convex?}
+
+Now, our first important observation is that $h_i$ is supported at the boundary of its region of dominance, excluding simple crossings. This is essentially because convex and affine curves can only cross at points.
+
+\begin{proposition}
+    \label{prop:boundary_support}
+    Let $h_1, h_2 : \bR^\times \to \bR$ be convex. Then
+    \begin{enumerate}[(i)]
+        \item $\partial X(h_1, h_2) \setminus C(h_1, h_2) \subseteq \supp(h_2)$; and
+        \item $\partial X(h_2, h_1) \setminus C(h_1, h_2) \subseteq \supp(h_1)$.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    We just prove (i) as (ii) follows by symmetry. In this case it is equivalent to show that $\partial X(h_1, h_2) \setminus \supp(h_2) \subseteq C(h_1, h_2)$.
+    
+    To that end, consider any $x \in \partial X(h_1, h_2) \setminus \supp(h_2)$. Then there must be some interval $(x r^{-1}, x r)$ around $x$ on which $h_2$ is affine. Moreover, since $x \in \partial{X(h_1, h_2)}$, there must be some $x' \in (x r^{-1}, x r)$ for which $h_1(x') < h_2(x')$. On the other hand, both $X(h_1, h_2)$ and $X(h_2, h_1)$ are disjoint open subsets of a connected space, so neither meets $\partial{X(h_1, h_2)}$. In particular, $h_1(x) = h_2(x)$ and $x \neq x'$. Without loss of generality, $x r^{-1} < x' < x$.
+
+    Now, we claim that $(x', x) \subseteq X(h_1, h_2)$ and $(x, x r) \subseteq X(h_2, h_1)$. Indeed, if there were $x'' \in (x', x)$ with $h_1(x'') \geq h_2(x'')$, then by applying Lemma~\ref{lemma:convex_vs_affine} with $x_1 = x''$ and $x_2 = x$, we get $h_1(x') \geq h_2(x')$, which is a contradiction. Likewise, if we could find $x'' \in (x, x r)$ with $h_1(x'') \leq h_2(x'')$, then applying Lemma~\ref{lemma:convex_vs_affine} to $x_1 = x$ and $x_2 = x''$ yields once again $h_1(x') \geq h_2(x')$, which is impossible. Overall, shrinking $r$ a little as needed, we have that $x \in C(h_1, h_2)$.
+\end{proof}
+
+The other key observation is that the support of $h_i$ meets every maximal interval in which it is dominated. Recall that every open set can be decomposed into connected components (disjoint open intervals in this case). For convenience, we will write $h(0) := \lim_{x \to 0} h(x)$ when this limit exists.
+
+\begin{proposition}
+    \label{prop:dominated_support}
+    Let $h_1, h_2 : \bR^\times \to \bR$ be convex, bounded, and decreasing such that $h_1(0) = h_2(0)$. Then for any connected component $I \neq \bR^\times$ of $X(h_1, h_2)$, we have $I \cap \supp(h_1) \neq \varnothing$. Similarly for each connected component $I \neq \bR^\times$ of $X(h_2, h_1)$, we have $I \cap \supp(h_2) \neq \varnothing$.
+\end{proposition}
+
+\begin{proof}
+    The two claims are symmetric so we just prove the first one. Let $I = (a, b) \neq \bR^\times$ be a connected component of $X(h_1, h_2)$ and assume that $I$ does not meet $\supp(h_1)$, i.e. $h_1$ is affine over the interval $\overline{I}$.
+    
+    First, we claim that $b < \infty$. Indeed, suppose that we had $b = \infty$. Then $a > 0$ as $I \neq \bR^\times$. Now, since $h_1$ and $h_2$ are convex and, in particular continuous over $\bR^\times$, if it were the case that $h_1(a) < h_2(a)$, then we could extend the interval $(a, \infty)$ to the left to obtain a larger interval in $X(h_1, h_2)$, whereas we assumed that $I$ was a connected component. Thus $h_2(a) \leq h_1(a)$. But $h_1$ is affine and bounded on an unbounded interval $[a, \infty)$, so the only possibility is that $h_1$ is constant on $[a, \infty)$. In particular since $h_2$ is decreasing, $h_2$ must be dominated by $h_1$ over all of $I = (a, \infty) \subseteq X(h_1, h_2)$, which is a contradiction.
+
+    Next, we claim that $h_2$ is dominated by $h_1$ at the endpoints $\{a, b\}$. Indeed, if $a = 0$, then $h_1(a) = h_2(a)$ by assumption and, if $a > 0$, then by the same interval extension argument as before, we have $h_2(a) \leq h_1(a)$. Likewise, since $b < \infty$ and since the interval $I$ is maximal, we must have $h_2(b) \leq h_1(b)$ as well. Overall, $h_2$ is dominated at the endpoints of $I$ by an affine curve $h_1$, so by convexity $h_2$ must be dominated by $h_1$ over all of $I \subseteq X(h_1, h_2)$, which is impossible.
+\end{proof}
+
+We now can prove our main result of the section, which implies \Cref{thm:well_ordering}. We note the small caveat that the queries must be non-degenerate, namely their PLDs must be supported at at least two finite points. This is not serious practical limitation.
+
+\begin{theorem}
+    \label{thm:hockey_link}
+    Let $h_1, h_2 : \bR^\times \to \bR$ be non-degenerate hockey-stick curves that are not well-ordered. Then one of $\supp(h_1), \supp(h_2)$ links $X(h_1, h_2)$ and $X(h_2, h_1)$.
+\end{theorem}
+
+\begin{proof}
+    We begin with the easy case: Assume that one of $\partial X(h_1, h_2), \partial X(h_2, h_1)$ is not fully contained in $C(h_1, h_2)$. Without loss of generality, suppose $\partial X(h_1, h_2) \nsubseteq C(h_1, h_2)$. By Proposition~\ref{prop:boundary_support}, $\supp(h_2)$ meets $\partial X(h_1, h_2) \subseteq \overline{X(h_1, h_2)}$. Furthermore, since $h_1$ and $h_2$ are not well-ordered, $X(h_2, h_1) \neq \varnothing, \bR^\times$ and thus $\supp(h_2)$ meets $X(h_2, h_1)$ as well by Proposition~\ref{prop:dominated_support}. By Lemma~\ref{lemma:closure_linkage}, $\supp(h_2)$ must link $X(h_1, h_2)$ and $X(h_2, h_1)$.
+
+    On the other hand, assume that $\partial X(h_1, h_2)$ and $\partial X(h_2, h_1)$ are both contained in $C(h_1, h_2)$ and assume toward a contradiction that neither $\supp(h_1)$ nor $\supp(h_2)$ links $X(h_1, h_2)$ and $X(h_2, h_1)$. We will derive a contradiction in two steps: First, we establish the structure of $E(h_1, h_2)$, $\supp(h_1)$, $\supp(h_2)$ and second, we derive a recurrence for the values of $h_1$ and $h_2$ at the points where they meet. By analyzing the characteristic polynomial of this recurrence, we can show that $h_1$ and $h_2$ must be either unbounded or constant, contradicting our assumptions.
+
+    Now, our first major goal is to argue that $E(h_1, h_2)$ can be expressed of the form $a^\bZ \{b_1, b_2\}$ for some $1 \leq b_1 < b_2 < a$ and, exchanging the roles of $h_1$ and $h_2$ as needed, that $\supp(h_1) = a^\bZ s_1$ and $\supp(h_2) = a^\bZ s_2$ for some $s_1 \in (b_1, b_2)$ and $s_2 \in (b_2, ab_1)$.
+
+    To this end, we first argue that $E(h_1, h_2)$ lives in both $\overline{X(h_1, h_2)}$ and $\overline{X(h_2, h_1)}$. Indeed, suppose we could find some $x \in \partial \textrm{int}(E(h_1, h_2))$. In this case,
+    \begin{align*}
+        x & \in \partial E(h_1, h_2) \\
+            & = \partial (X(h_1, h_2) \cup X(h_2, h_1))^C \\
+            & = \partial (X(h_1, h_2) \cup X(h_2, h_1)) \\
+            & \subseteq \partial X(h_1, h_2) \cup \partial X(h_2, h_1) \\
+            & \subseteq C(h_1, h_2),
+    \end{align*}
+    so, by construction of $C(h_1, h_2)$, there is some punctured neighbourhood $(x r^{-1}, x r) \setminus \{x\}$ of $x$ lying outside of $E(h_1, h_2) \supseteq \textrm{int}(E(h_1, h_2))$, which would contradict $x \in \partial \textrm{int}(E(h_1, h_2))$. Thus $\textrm{int}(E(h_1, h_2))$ has empty boundary, so it must be both closed and open in $\bR^\times$. But $h_1$ and $h_2$ cross, so we cannot have $\textrm{int}(E(h_1, h_2)) = \bR^\times$. By connectivity of $\bR^\times$, the only possibility is that $\textrm{int}(E(h_1, h_2)) = \varnothing$. In particular, by construction of the simple crossing points, we have
+    \begin{align*}
+        E(h_1, h_2)
+            = \partial E(h_1, h_2)
+            \subseteq C(h_1, h_2)
+            \subseteq \partial X(h_1, h_2) \cap \partial X(h_2, h_1)
+            \subseteq \overline{X(h_1, h_2)} \cap \overline{X(h_2, h_1)}.
+    \end{align*}
+
+    We can now deduce the structure of $E(h_1, h_2)$. First, notice that $\supp(h_i)$ divides $E(h_1, h_2)$. If not, then $\supp(h_i)$ must link $E(h_1, h_2)$ with $\bR^\times \setminus E(h_1, h_2) = X(h_1, h_2) \cup X(h_2, h_1)$, so it must either link $E(h_1, h_2) \subseteq \overline{X(h_2, h_1)}$ with $X(h_1, h_2)$ or it must link $E(h_1, h_2) \subseteq \overline{X(h_1, h_2)}$ with $X(h_2, h_1)$. In either case, by Lemma~\ref{lemma:closure_linkage}, $\supp(h_i)$ links $X(h_1, h_2)$ with $X(h_2, h_1)$, whereas we assumed otherwise. Therefore, $\supp(h_i)$ divides $E(h_1, h_2)$, so, by Proposition~\ref{prop:dense_subgroup}, there must be $a > 1$ and $B \subseteq [1, a)$ such that $E(h_1, h_2) = a^\bZ B$ and such that the elements of $\supp(h_1)$ and of $\supp(h_2)$ are multiplicatively separated by at least a factor of $a$. We claim that $B$ contains no more than two points. Indeed, suppose we could find $b_1 < b_2 < b_3 \in B$. By construction of $C(h_1, h_2) \ni b_1, b_2, b_3$, $(b_1, b_2) \cup (b_2, b_3) \cup (b_3, ab_1)$ contains at least three connected components of $X(h_1, h_2) \cup X(h_2, h_1)$, so in particular, it must contain at least two connected components of $X(h_1, h_2)$ or of $X(h_2, h_1)$. By Proposition~\ref{prop:dominated_support}, $(b_1, ab_1)$ contains at least two points from $\supp(h_1)$ or from $\supp(h_2)$, which is impossible because these points were multiplicatively separated by $a$. Thus $|B| \leq 2$. On the other hand, if $B = \{b\}$, then we have $E(h_1, h_2) = a^\bZ\{b\} = a^{2\bZ}\{b\} \cup a^{2\bZ + 1}\{b\} = (a^2)^\bZ\{b, ab\}$, so in all cases we can write $E(h_1, h_2) = a^\bZ\{b_1, b_2\}$ for some $1 \leq b_1 < b_2 < a$.
+
+    Finally, we determine the structure of $\supp(h_1)$ and $\supp(h_2)$. For $k \in \bZ$, consider the alternating intervals $I_k := (a^k b_1, a^k b_2)$ and $J_k := (a^k b_2, a^{k+1} b_1)$. Then, for every $k \in \bZ$, $I_k$ does not meet $E(h_1, h_2)$, so, by the intermediate value theorem, either $I_k \subseteq X(h_1, h_2)$ or $I_k \subseteq X(h_2, h_1)$ and, similarly, either $J_k \subseteq X(h_1, h_2)$ or $J_k \subseteq X(h_2, h_1)$. Now, assume without loss of generality that $I_0 \subseteq X(h_1, h_2)$. By induction and by construction of the simple crossings $C(h_1, h_2) \supseteq E(h_1, h_2)$, this forces $I_k \subseteq X(h_1, h_2)$ and $J_k \subseteq X(h_2, h_1)$ for every $k \in \bZ$. By Proposition~\ref{prop:dominated_support}, we can find $s_1 \in (b_1, b_2) \cap \supp(h_1)$ and $s_2 \in (b_2, ab_1) \cap \supp(h_2)$. In particular, $b_1/s_1 \cdot \supp(h_1) \ni b_1$ meets $E(h_1, h_2) = a^{\bZ}\{b_1, b_2\} \ni b_1$, so, since $\supp(h_1) \mid E(h_1, h_2)$, we must have that $b_1/s_1 \cdot \supp(h_1) \subseteq a^{\bZ} \{b_1, b_2\}$, i.e. $\supp(h_1) \subseteq a^{\bZ} \{s_1, b_2/b_1 \cdot s_1\}$. We now eliminate $b_2/b_1 \cdot s_1$ from the residue set. To that end, suppose we could find $s'_1 := a^k b_2/b_1 \cdot s_1 \in \supp(h_1)$. Then $\frac{b_1^2}{s_1 b_2} \cdot s'_1 = a^k b_1 \in E(h_1, h_1)$, so, since $\supp(h_1) \mid E(h_1, h_2)$, we must have $\frac{b_1^2}{b_2} = \frac{b_1^2}{s_1 b_2} \cdot s_1 \in E(h_1, h_2) = a^\bZ \{b_1, b_2\}$ as well. But, $b_1/b_2 \in (a^{-1}, 1)$, so $\frac{b_1^2}{b_2} = a^k b_1$ is impossible, whereas $\frac{b_1^2}{b_2} = a^k b_2$ forces $b_1/b_2 = a^{-1/2}$. Moreover, $s_1 \in (b_1, b_2)$, so we have
+    \begin{align*}
+        s'_1
+            = a^k b_2/b_1 \cdot s_1
+            \in (a^k b_2/b_1 \cdot b_1, a^k b_2/b_1 \cdot b_2)
+            = (a^k b_2, a^k b_1 \cdot (b_2/b_1)^2)
+            = (a^k b_2, a^{k + 1} b_1)
+            = J_k,
+    \end{align*}
+    which contradicts our assumption that $\supp(h_1)$ fails to link $X(h_1, h_2) \supseteq I_0$ with $X(h_2, h_1) \supseteq J_k$. Therefore $\supp(h_1) \subseteq a^\bZ s_1$ which, noting that $a^\bZ s_1 \cap I_k = a^k s_1$, forces $\supp(h_1) = a^\bZ s_1$ due to Proposition~\ref{prop:dominated_support}. By a symmetric argument, $\supp(h_2) = a^\bZ s_2$ as well.
+
+    Now that we understand the structure of the crossings and of the support, we can calculate the trajectory of $h_1$ and $h_2$ over the crossing points. To this end, consider $y_k := h_1(a^k b_1) = h_2(a^k b_1)$ and $y'_k := h_1(a^k b_2) = h_2(a^k b_2)$. Now, for any $k \in \bZ$, the interval $[a^k b_1, a^{k+1} b_2] = \overline{I_k} \cup \overline{J_k} \cup \overline{I_{k + 1}}$ meets $\supp(h_2)$ at $a^k s_2$ and nowhere else. Thus $h_2$ is affine over $[a^k b_1, a^k s_2]$ and $[a^k s_2, a^{k+1}b_2]$ separately. By extrapolation in the former interval, we get
+    \begin{align*}
+        h_2(a^k s_2)
+            = \frac{a^k b_2 - a^k s_2}{a^k b_2 - a^k b_1}h_1(a^k b_1) +
+              \frac{a^k s_2 - a^k b_1}{a^k b_2 - a^k b_1}h_1(a^k b_2)
+            = \frac{b_2 - s_2}{b_2 - b_1}y_k + \frac{s_2 - b_1}{b_2 - b_1}y'_k
+    \end{align*}
+    and, furthermore, extrapolation over the latter interval yields
+    \begin{align*}
+        y'_{k + 1}
+            & = h_2(a^{k+1}b_2) \\
+            & = \frac{a^{k+1}b_1 - a^{k+1}b_2}{a^{k+1}b_1 - a^k s_2}h_1(a^k s_2) +
+                \frac{a^{k+1}b_2 - a^k s_2}{a^{k+1}b_1 - a^k s_2}h_2(a^{k+1}b_1) \\
+            & = \frac{a(b_1 - b_2)}{ab_1 - s_2}\left(
+                    \frac{b_2 - s_2}{b_2 - b_1}y_k + \frac{s_2 - b_1}{b_2 - b_1}y'_k
+                \right) +
+                \frac{ab_2 - s_2}{ab_1 - s_2}y_{k + 1} \\
+            & = \underbrace{\frac{a(s_2 - b_2)}{ab_1 - s_2}}_{=: U'}y_k + \underbrace{-\frac{a(s_2 - b_1)}{ab_1 - s_2}}_{=: V'}y'_k + \underbrace{\frac{ab_2 - s_2}{ab_1 - s_2}}_{=: W'}y_{k + 1}.
+    \end{align*}
+    % the interval $[a^k b_2, a^{k+2} b_1] = \overline{J_k} \cup \overline{I_{k + 1}} \cup \overline{J_{k + 1}}$ meets $\supp(h_1)$ at $a^{k + 1} s_1$ and nowhere else. Thus $h_1$ is affine over $[a^k b_2, a^{k+1}s_1]$ and $[a^{k+1}s_1, a^{k+2}b_1]$ separately. By extrapolation in the former interval, we get
+    % \begin{align*}
+    %     h_1(a^{k+1}s_1)
+    %         = \frac{a^{k+1}b_1 - a^{k+1}s_1}{a^{k+1}b_1 - a^k b_2}h_1(a^k b_2) +
+    %           \frac{a^{k+1}s_1 - a^k b_2}{a^{k+1}b_1 - a^k b_2}h_1(a^{k+1}b_1)
+    %         = \frac{a(b_1 - s_1)}{ab_1 - b_2}y'_k + \frac{as_1 - b_2}{ab_1 - b_2}y_{k + 1}
+    % \end{align*}
+    % and, furthermore, extrapolation over the latter interval yields
+    % \begin{align*}
+    %     y_{k + 2}
+    %         & = h_1(a^{k+2}b_1) \\
+    %         & = \frac{a^{k+1}b_2 - a^{k+2}b_1}{a^{k+1}b_2 - a^{k+1} s_1}h_1(a^{k+1} s_1) +
+    %             \frac{a^{k+2}b_1 - a^{k+1} s_1}{a^{k+1}b_2 - a^{k+1} s_1}h_1(a^{k+1}b_2) \\
+    %         & = \frac{b_2 - ab_1}{b_2 - s_1}\left(
+    %                 \frac{a(b_1 - s_1)}{ab_1 - b_2}y'_k + \frac{as_1 - b_2}{ab_1 - b_2}y_{k + 1}
+    %             \right) +
+    %             \frac{ab_1 - s_1}{b_2 - s_1}y'_{k + 1} \\
+    %         & = \underbrace{\frac{a(s_1 - b_1)}{b_2 - s_1}}_{=: U}y'_k + \underbrace{-\frac{as_1 - b_2}{b_2 - s_1}}_{=: V}y_{k + 1} + \underbrace{\frac{ab_1 - s_1}{b_2 - s_1}}_{=: W}y'_{k + 1}.
+    % \end{align*}
+    By an analogous argument, we have that
+    \begin{align*}
+    y_{k + 2}
+        = \underbrace{\frac{a(s_1 - b_1)}{b_2 - s_1}}_{=: U}y'_k + \underbrace{-\frac{as_1 - b_2}{b_2 - s_1}}_{=: V}y_{k + 1} + \underbrace{\frac{ab_1 - s_1}{b_2 - s_1}}_{=: W}y'_{k + 1}
+    \end{align*}
+    as well, which together yields the system
+    % Analogously, we have $y_{k + 3} = U_d y_k + V_d y_{k+1} + W_d y_{k+2}$ for even $k$. Together, we have the system
+    \begin{align*}
+        \left\{
+        \begin{aligned}
+            y'_{k + 1} & = U' y_k + V' y'_k + W' y_{k + 1} \\
+            y_{k + 2} & = U y'_k + V y_{k+1} + W y'_{k+1} \\
+            y'_{k + 2} & = U' y_{k+1} + V' y'_{k+1} + W' y_{k+2} \\
+            y_{k + 3} & = U y'_{k+1} + V y_{k+2} + W y'_{k+2}
+        \end{aligned}
+        \right.
+    \end{align*}
+    for $k \in \bZ$. By isolating $y'_{k+1}$ in terms of $y_k, y_{k+1}, y_{k+2}$ from the first two equations, substituting into the equation for $y'_{k+2}$, and finally substituting this into the equation for $y_{k + 3}$, we obtain the symmetrized recurrence
+    \begin{align*}
+        y_{k + 3} = U U' y_k + (U W' + U' W - V V') y_{k + 1} + (V + V' + W W') y_{k + 2}
+    \end{align*}
+    for $k \in \bZ$. Thus $(y_k)_{k \in \bZ}$ satisfies a linear homogeneous recurrence with characteristic polynomial
+    \begin{align*}
+        f(t) = t^3 - (V + V' + W W')t^2 - (U W' + U' W - V V') t - U U',
+    \end{align*}
+    which after applying some computational effort factors as
+    \begin{align*}
+        f(t) = (t - 1)(t - a)\left( t - a\left( \frac{s_1 - b_1}{b_2 - s_1} \right)\left( \frac{s_2 - b_2}{ab_1 - s_2} \right) \right).
+    \end{align*}
+    In particular, every root of $f$ lies in $\bR^\times$. On the other hand, a homogeneous linear recurrence over the integers admits a bounded non-constant solution if and only its characteristic polynomial has a non-unit root lying on the complex unit circle (see e.g. Section 2.3 of \cite{elaydi2005introduction}). Therefore either $y_k = h_1(a^k b_1) = h_2(a^k b_1)$ is unbounded, which is impossible because hockey-stick curves are bounded, or it must be constant, which is also impossible because hockey-stick curves are monotone, so this would force $h_1$ and $h_2$ to be constant and thus well-ordered.
+\end{proof}
+
+\Cref{thm:well_ordering} now follows immediately by combining Propositions~\ref{prop:pld_gap_amplification} and~\ref{prop:support_conversion} with Theorem~\ref{thm:hockey_link} by taking $B := \sup\{B_1, B_2\}$.
+% \todo{elaborate a little maybe}

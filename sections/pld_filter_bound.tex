@@ -1,0 +1,50 @@
+\section{Lower and Upper Bounds for the Natural PLD Filter}
+
+We consider the ``natural'' $(\eps, \delta)$-PLD filter where we simply compose the dominating pairs of the mechanisms and check that the composed dominating pairs satisfies $(\eps, \delta)$-DP. The formal description of the filter is given below in \Cref{alg:pld-privacy-filter}.
+
+\begin{algorithm}[h!]
+        \caption{$(\eps, \delta)$-PLD Filter}
+        \label{alg:pld-privacy-filter}
+        \begin{algorithmic}
+            \REQUIRE Privacy budgets $\eps, \delta$, adversary (or analyst) $\adv$, number of steps $k$, Input Dataset $X$
+            \STATE $t \gets 0$
+            \WHILE{$\adv$ continues and $t < k$}
+            \STATE $t \leftarrow t+1$
+            \STATE $\adv$ gives mechanism $\mech_t$ with worst-case dominating pair $(P_t, Q_t)$  \algcomment{can depend on previous results $m_{<t}$}
+            \IF{$H_{e^{\eps}}(P_1 \times \cdots \times P_t \| Q_1 \times \cdots \times Q_t) \leq \delta$}
+            \STATE $r=\top$
+            \ELSE
+            \STATE $r=\bot$
+            \STATE $P_t, Q_t \gets \Iddist$, $\mech_t \leftarrow \nullmech$
+            \ENDIF
+            \STATE $\adv$ receives $v_t \triangleq (r, m_t), \ m_t \sim \mech_t(X)$
+            \ENDWHILE
+            \RETURN $(v_1, \ldots, v_{t})$
+        \end{algorithmic}
+    \end{algorithm}
+
+Our main result is that, while the above natural $(\eps, \delta)$-PLD filter can fail, it cannot fail \emph{too badly}; in the sense that we still get a DP guarantee with a blow-up in parameters that is only polylogarithmic in $k, 1/\delta$, as stated below.
+
+\begin{theorem} \label{thm:main-ub}
+The $(\eps,\delta)$-PLD filter (\Cref{alg:pld-privacy-filter}) satisfies $\Paren{\kappa \cdot (\eps + 1), \kappa \cdot \delta}$-DP where $$\kappa = O\Paren{\Paren{\log k + \log\Paren{1 + \frac{1}{\eps}}} \cdot \log(1/\delta)}.$$ 
+\end{theorem}
+
+When $\eps = \Omega(1)$, the above guarantee is simply $(\kappa' \cdot \eps, \kappa' \cdot \delta)$-DP where $\kappa' = O(\log k \cdot \log(1/\delta))$. 
+
+\begin{remark}
+We tradeoff the blow-up factors of the two parameters $\eps, \delta$. For example, by changing $\eps_i$ in \Cref{subsec:disc} to $\frac{2\eps}{2^{n - 1 - i}}$. This allows us to have a guarantee of $\left(\kappa \cdot \eps, \kappa \cdot \frac{\delta}{\eps} \right)$-DP for $\kappa = O(\log k \cdot \log(1/\delta))$.
+\end{remark}
+
+\begin{remark}
+In our current proof, we do not try to optimize the parameter $\kappa$. In particular, it seems plausible that our techniques can achieve $\kappa = \tilde{O}(\log k + \log(1/\delta))$ with a more refined argument. Nevertheless, we are not aware of how to remove the dependency of $k$ or $\delta$ in $\kappa$, and this remains an interesting open question.
+\end{remark}
+
+\begin{remark}
+The only property we need for worst-case dominating pair is that it is symmetric (\Cref{lem:worst-case-symmetric}) in order to apply \Cref{thm:optimistic,thm:pessimistic} below. Thus, our proof still works as long as $(P_t, Q_t)$ is any symmetric (\emph{not necessarily worst-case}) dominating pair.
+\end{remark}
+
+We have also a lower bound that nearly matches the upper bound in \Cref{thm:main-ub}.
+
+\begin{theorem} \label{thm:natural-filter-lower}
+For any $k > 1$, any sufficiently small $\delta > 0$ (depending on $k$) and any sufficiently large $\eps > 0$ (depending on $k$ but not in $\delta$), it is possible for the natural PLD filter to allow $$\E[D_{e^\eps}(X_1 + \cdots + X_k)] \geq \Omega\left(\frac{\ln(1/\delta)}{k}\right)^{k-1} \cdot \delta.$$
+\end{theorem}

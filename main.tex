@@ -1,0 +1,98 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\setstretch{1.0} % change line spacing
+
+\usepackage{dsfont}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{url}
+\usepackage{enumerate}
+% \usepackage{natbib}
+% \bibliographystyle{abbrvnat}
+% \setcitestyle{authoryear,open={((},close={))}} %Citation-related commands
+
+\usepackage{subcaption}
+
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{cleveref}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows.meta}
+
+\usepackage[utf8]{inputenc}
+\usepackage[style=alphabetic,maxalphanames=4,minalphanames=3, maxbibnames=10, backend=biber, natbib=true]{biblatex}
+\addbibresource{refs/zotero_export.bib}
+\addbibresource{refs/manual_refs.bib}
+\addbibresource{refs/biblio.bib}
+
+\DeclareSourcemap{
+	\maps[datatype=bibtex, overwrite]{
+		\map{
+			% For any entry of type 'article'...
+			\pertype{article}
+			% ...find the 'urldate' field and remove it.
+			\step[fieldset=urldate, null]
+		}
+		\map{
+			\pertype{inproceedings}
+			\step[fieldset=urldate, null]
+		}
+		\map{
+			% For any entry that has an `eprint' field
+			\step[fieldsource=eprint,fieldset=urldate, null]
+		}
+	}
+}
+
+\input{notations}
+
+\allowdisplaybreaks
+
+
+% \title{Natural Privacy Filters Are Not Always Free: A Characterization of Free Natural Filters and the Cost of Adaptivity\thanks{Authors BH, EL, PM, and PT in alphabetical order.}}
+\title{Natural Privacy Filters Are Not Always Free: A Characterization of Free Natural Filters\thanks{Authors BH, EL, PM, and PT in alphabetical order.}}
+
+\author{
+	Matthew Regehr\thanks{University of Waterloo. \texttt{matt.regehr@uwaterloo.ca}. Supported by an NSERC CGS-D scholarship.} \and
+	Bingshan Hu\thanks{University of British Columbia. \texttt{bingsha1@cs.ubc.ca}} \and
+	Ethan Leeman\thanks{Google Research. \texttt{ethanleeman@google.com}} \and
+	Pasin Manurangsi\thanks{Google Research. \texttt{pasin@google.com}} \and
+	Pierre Tholoniat\thanks{Google. \texttt{pierre@cs.columbia.edu}. Work done while at Columbia University.} \and
+	Mathias L\'ecuyer\thanks{University of British Columbia. \texttt{mathias.lecuyer@ubc.ca}}
+}
+
+\begin{document}
+	\maketitle
+
+	\begin{abstract}
+		We study natural privacy filters, which enable the exact composition of differentially private (DP) mechanisms with adaptively chosen privacy characteristics. Earlier privacy filters consider only simple privacy parameters such as R\'enyi-DP or Gaussian DP parameters. Natural filters account for the entire privacy profile of every query, promising more efficient use a given privacy budget. We show that, contrary to other forms of DP, natural privacy filters are not free in general. We present a characterization of when a family of private queries admits free natural filters for a given budget. We show that only families of privacy mechanisms that are well-ordered when composed admit free natural privacy filters with respect to an arbitrary privacy budget.
+		% For other families of privacy mechanisms, we give the first XXX-bound for the cost of adaptivity under PLD composition.
+	\end{abstract}
+
+	\input{sections/intro}
+	\input{sections/prelims}
+	\input{sections/adversary_theory}
+	\input{sections/natural_filter_characterization}
+	\input{sections/implications_special_cases}
+	% \input{sections/pld_filter_bound}
+	\input{sections/well_ordering_proof}
+
+	\printbibliography
+
+	\input{sections/appendix}
+\end{document}
