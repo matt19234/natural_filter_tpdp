@@ -12,18 +12,19 @@ In our work we reason about the composition of adaptive mechanisms, which are pe
 	\end{align*}
 \end{definition}
 
-It is desirable to furnish hypothesis testing problems $(P, Q)$ with some kind of ordering so that we can compare the privacy guarantees offered by various mechanisms. We also require an ordering so that we can make sense of natural privacy filters. Fortunately testing pairs can be equipped with a very natural order, namely the Blackwell order.
+It is desirable to furnish hypothesis testing problems $(P, Q)$ with some kind of ordering so that we can compare the privacy guarantees offered by various mechanisms. We also require an ordering so that we can make sense of natural privacy filters. Fortunately testing pairs can be equipped with a natural information-theoretic order, namely the Blackwell order.
 
 \begin{definition}
 	For a pair of distributions $(P, Q)$ on a common probability space $\Omega$ and a second pair $(P', Q')$ on $\Omega'$, we say that $(P', Q')$ dominates $(P, Q)$ in the Blackwell order, written $(P, Q) \preceq (P', Q')$, if we can find a Markov kernel $\phi$ from $\Omega'$ to $\Omega$ such that $P = \phi P'$ and $Q = \phi Q'$.
 \end{definition}
 
-Informally, the Blackwell order says that more information is available for distinguishing $P'$ and $Q'$ compared to $P$ vs $Q$. For mechanisms, we can interpret this as $(M(D_1), M(D_2)) \preceq (M'(D_1), M'(D_2))$ when $M$ can be reconstructed from $M'$ by introducing additional randomness through the kernel $\phi$.
+% Informally, the Blackwell order says that more information is available for distinguishing $P'$ and $Q'$ compared to $P$ vs $Q$. For mechanisms, we can interpret this as $(M(D_1), M(D_2)) \preceq (M'(D_1), M'(D_2))$ when $M$ can be reconstructed from $M'$ by introducing additional randomness through the kernel $\phi$.
 
-We can consolidate hypothesis testing pairs into a privacy loss distribution (PLD) while still fully capturing privacy characteristics \cite{DworkR16}. To formalize the PLD for $(P, Q)$, we require the likelihood ratio (Radon--Nikodym derivative) $\frac{dP}{dQ}$. Formally speaking, this requires absolute continuity. However, by extending likelihood ratios with $\infty$ as needed, we can allow mechanisms that violate absolute continuity such as the $(\eps, \delta)$-RR mechanism.
+We can consolidate hypothesis testing pairs into a privacy loss distribution (PLD) while still fully capturing privacy characteristics \cite{DworkR16}.
+% To formalize the PLD for $(P, Q)$, we require the likelihood ratio (Radon--Nikodym derivative) $\frac{dP}{dQ}$. Formally speaking, this requires absolute continuity. However, by extending likelihood ratios with $\infty$ as needed, we can allow mechanisms that violate absolute continuity such as the $(\eps, \delta)$-RR mechanism.
 
 \begin{definition}
-	Let $P$ and $Q$ be distributions on a common probability space. The PLD of $(P, Q)$, denoted $\pld(P \parallel Q)$, is the distribution over $\bR \cup \{\infty\}$ of $\log(\frac{dP}{dQ}(\omega)), \omega \sim P$.
+	Let $P$ and $Q$ be distributions with likelihood ratio $\frac{dP}{dQ}$. The PLD of $(P, Q)$, denoted $\pld(P \parallel Q)$, is the distribution over $\bR \cup \{\infty\}$ of $\log(\frac{dP}{dQ}(\omega)), \omega \sim P$.
 \end{definition}
 
 For shorthand, we denote by $\pld(M) := \pld(M(D_1) \parallel M(D_2))$ the PLD of a mechanism $M$. PLDs have a remarkable algebraic structure: Letting $\Iddist$ denote the identically zero distribution and letting $\pld(P \parallel Q) \preceq \pld(P' \parallel Q')$ when $(P, Q) \preceq (P', Q')$, it turns out that PLDs form a partially-ordered commutative monoid under the convolution operator $\oplus$ and the Blackwell order $\preceq$. More remarkable still is that, like the real numbers, one can take define the supremum for PLDs. To the best of our knowledge this property has not been documented in the literature.
