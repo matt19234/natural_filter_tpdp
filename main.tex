@@ -26,17 +26,11 @@
 \usepackage{algorithmic}
 \usepackage{cleveref}
 
-\usepackage{tikz}
-\usetikzlibrary{calc}
-\usetikzlibrary{arrows.meta}
-
 \input{notations}
 
 \allowdisplaybreaks
 
-
-% \title{Natural Privacy Filters Are Not Always Free: A Characterization of Free Natural Filters and the Cost of Adaptivity\thanks{Authors BH, EL, PM, and PT in alphabetical order.}}
-\title{Natural Privacy Filters Are Not Always Free: A Characterization of Free Natural Filters\thanks{Authors BH, EL, PM, and PT in alphabetical order.}}
+\title{Natural Privacy Filters Are Not Always Free: A Characterization of Free Natural Filters\thanks{Authors BH, EL, PM, and PT in alphabetical order. The full version is available at \url{https://arxiv.org/abs/2602.15815}. Please note that this work overlaps with a concurrent and independent work \url{https://arxiv.org/abs/2602.06756}.}}
 
 \author{
 	Matthew Regehr\thanks{University of Waterloo. \texttt{matt.regehr@uwaterloo.ca}. Supported by an NSERC CGS-D scholarship.} \and
@@ -48,26 +42,182 @@
 }
 
 \begin{document}
-	\maketitle
 
-	\begin{abstract}
-		We study natural privacy filters, which enable the exact composition of differentially private (DP) mechanisms with adaptively chosen privacy characteristics. Earlier privacy filters consider only simple privacy parameters such as R\'enyi-DP or Gaussian DP parameters. Natural filters account for the entire privacy profile of every query, promising more efficient use a given privacy budget. We show that, contrary to other forms of DP, natural privacy filters are not free in general. We present a characterization of when a family of private queries admits free natural filters for a given budget. We show that only families of privacy mechanisms that are well-ordered when composed admit free natural privacy filters with respect to an arbitrary privacy budget.
-		% For other families of privacy mechanisms, we give the first XXX-bound for the cost of adaptivity under PLD composition.
-	\end{abstract}
+\maketitle
 
-	\input{sections/intro}
-	\input{sections/prelims}
-	\input{sections/adversary_theory}
-	\input{sections/natural_filter_characterization}
-	\input{sections/special_cases}
-	% \input{sections/pld_filter_bound}
+\begin{abstract}
+	We study natural privacy filters, which enable the exact composition of differentially private (DP) mechanisms with adaptively chosen privacy characteristics. Earlier privacy filters consider only simple privacy parameters such as R\'enyi-DP or Gaussian DP parameters. Natural filters account for the entire privacy profile of every query, promising more efficient use a given privacy budget. We show that, contrary to other forms of DP, natural privacy filters are not free in general. We present a characterization of when a family of private queries admits free natural filters for a given budget. We show that only families of privacy mechanisms that are well-ordered when composed admit free natural privacy filters with respect to an arbitrary privacy budget.
+\end{abstract}
 
-	\bibliographystyle{plain}
-	\bibliography{bibliography}
+\section{Introduction}
 
-	% \appendix
-	% \input{sections/prelims_app}
-	% \input{sections/adversary_theory_app}
-	% \input{sections/well_ordering_proof}
-	% \input{sections/special_cases_app}
+There is a sustained push to integrate and deploy differential privacy (DP) in a large number of applications \cite{opendp-registry}, from machine learning (ML) and artificial intelligence (AI) models \cite{kairouz2021practical,sinha2025vaultgemma}. This practical push also motivates theoretical development to reduce the cost and increase the flexibility of DP. A prominent theoretical development over the last few years is exact and efficient privacy loss accounting under composition based on the privacy loss distribution (PLD), privacy profile, and $f$-DP formalisms \cite{sommer2019privacy, dong2022gaussian}.
+
+Fully adaptive composition, the main topic of this paper, concerns the composition of DP mechanisms with interactively chosen privacy characteristics. This is needed to support long-running applications in which analysts may interactively re-assess the privacy budget allocated to each query in order to meet operational needs \cite{lecuyer2019privacy,kostopoulou2023turbo,kuchler2024cohere}. Fully adaptive composition is formalized in terms of \emph{privacy filters} \cite{RRUV16}, which accept any series of private queries as long as their composition has privacy characteristics satisfying some budget that is fixed in advance.
+
+A key research direction is to investigate whether improvements in privacy accounting are compatible with fully adaptive composition. We know that privacy filters are free for $\epsilon$-DP \cite{RRUV16} and R\'enyi-based (zCDP, RDP) DP accounting \cite{FZ21,lecuyer2021practical}. Filters are also free for Gaussian mechanisms under $f$-DP and PLD accounting \cite{ST22,KTH22}. However, the best known result for filters based on $(\epsilon, \delta)$-DP accounting only shows that these filters are asymptotically free, with worse constants than non-adaptive composition \cite{WRRW23}. Even less is known about filters leveraging exact accounting (PLD, privacy profile, $f$-DP) techniques for general classes of mechanisms. We refer to filters based on lossless privacy accounting as \emph{natural filters}. In this paper, we make three important contributions towards fully understanding natural privacy filters:
+\begin{itemize}
+	\item First, in \S\ref{sec:adversary_theory} we present a general theory of adaptive mechanisms that issue adversarial queries with a constrained per-query privacy cost.
+	\item Next, in \S\ref{sec:natural_filter_characterization} we apply this theory to derive exact conditions for when the natural filter is free for a given family of queries and a given budget. Surprisingly, these conditions do not always hold.
+	\item Finally, we show in particular that filters are only free for very restricted families of mechanisms: those that are closed under composition and are information theoretically well-ordered.
+\end{itemize}
+
+Our work also includes some minor contributions including that PLDs can be assigned a natural ordering satisfying a completeness property enabling one to take a supremum of PLDs (see \Cref{prop:pld_sup}). As far as we are aware this property has not been documented in the privacy accounting literature. We also enumerate in \S\ref{sec:implications} some families of queries and budgets that do and do not admit free filters.
+
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+A DP mechanism is randomized algorithm $M : \cD \to \cY$ where $\cD$ is some space of datasets containing sensitive information. In our work, the particular neighbouring relation over $\cD$ turns out to not be relevant. In fact, our conclusions hold for an arbitrary pair of datasets. For this reason, we fix throughout a single arbitrary pair of datasets $(D_1, D_2) \in \cD \times \cD$ and view the privacy characteristics of a mechanism $M$ in terms of the hypothesis testing problem $M(D_1)$ vs. $M(D_2)$ \cite{WassermanZ10,DRS22}.
+
+In our work we reason about the composition of adaptive mechanisms, which are permitted to inspect outcomes of any previously run mechanism. It is enough to define adaptivity for just two rounds of interaction as we can define more complex adaptively composed mechanisms inductively.
+
+\begin{definition}
+	Let $M_1 : \cD \to \cY_1$ be a mechanism and let $M_2 : \cD \times \cY_1 \to \cY_2$ be an adaptive mechanism. The adaptive composition of $M_1$ and $M_2$ is the mechanism
+	\begin{align*}
+		(M_1 \otimes M_2)(D) := (Y_1, Y_2), Y_1 \sim M_1(D), Y_2 \sim M_2(D; Y_1).
+	\end{align*}
+\end{definition}
+
+It is desirable to furnish hypothesis testing problems $(P, Q)$ with some kind of ordering so that we can compare the privacy guarantees offered by various mechanisms. We also require an ordering so that we can make sense of natural privacy filters. Fortunately testing pairs can be equipped with a natural information-theoretic order, namely the Blackwell order.
+
+\begin{definition}
+	For a pair of distributions $(P, Q)$ on a common probability space $\Omega$ and a second pair $(P', Q')$ on $\Omega'$, we say that $(P', Q')$ dominates $(P, Q)$ in the Blackwell order, written $(P, Q) \preceq (P', Q')$, if we can find a Markov kernel $\phi$ from $\Omega'$ to $\Omega$ such that $P = \phi P'$ and $Q = \phi Q'$.
+\end{definition}
+
+We can consolidate hypothesis testing pairs into a privacy loss distribution (PLD) while still fully capturing privacy characteristics \cite{DworkR16}.
+
+\begin{definition}
+	Let $P$ and $Q$ be distributions with likelihood ratio $\frac{dP}{dQ}$. The PLD of $(P, Q)$, denoted $\pld(P \parallel Q)$, is the distribution over $\bR \cup \{\infty\}$ of $\log(\frac{dP}{dQ}(\omega)), \omega \sim P$.
+\end{definition}
+
+For shorthand, we denote by $\pld(M) := \pld(M(D_1) \parallel M(D_2))$ the PLD of a mechanism $M$. PLDs have a remarkable algebraic structure: Letting $\Iddist$ denote the identically zero distribution and letting $\pld(P \parallel Q) \preceq \pld(P' \parallel Q')$ when $(P, Q) \preceq (P', Q')$, it turns out that PLDs form a partially-ordered commutative monoid under the convolution operator $\oplus$ and the Blackwell order $\preceq$. More remarkable still is that, like the real numbers, one can take define the supremum for PLDs. To the best of our knowledge this property has not been documented in the literature.
+
+\begin{proposition}\label{prop:pld_sup}
+    For any non-empty family of PLDs $\mathcal{L}$ bounded above by at least one PLD, there exists a unique PLD $\sup \mathcal{L}$ that dominates $\mathcal{L}$ but is dominated by every upper bound for $\mathcal{L}$.
+\end{proposition}
+
+\section{Query-Restricted Adversaries}
+\label{sec:adversary_theory}
+
+In this section we develop a general theory of the privacy characteristics of adversarial adaptive mechanism when the queries the adversary may issue are restricted. This will lead directly to a theory of natural filters as we will see in \S\ref{sec:natural_filter_characterization}. For simplicity, we will assume that an adversary may always ``pass'' its turn by issuing a query with no privacy loss.
+
+\begin{definition}
+	Let $k$ be a positive integer. We define a privacy rule of length $k$ as a map $\Gamma$ that takes a sequence of PLDs $(L_1, \dots, L_{k'})$ ($0 \leq k' < k$) and outputs some collection of PLDs including $\Iddist$. We define a $\Gamma$-adversary as an adaptively composed mechanism $M = M_1 \otimes \dots \otimes M_k$ such that
+	\begin{align*}
+		L_i := \pld(M_i(\cdot; y_1, \dots, y_{i - 1})) \in \Gamma(L_1, \dots, L_{i - 1})
+	\end{align*}
+	for every $(y_1, \dots, y_{k - 1}) \in \cY_1 \times \dots \times \cY_{k - 1}$.
+	% \matt{can relax to with probability 1 over (Y_i)_i}
+	We will write $\Adv(\Gamma)$ to denote the set of $\Gamma$-adversaries and we will denote by
+	\begin{align*}
+		\pld(\Gamma) := \sup\{\pld(M) : M \in \Adv(\Gamma)\}
+	\end{align*}
+	the worst-case privacy loss of arbitrary $\Gamma$-adversaries.
+\end{definition}
+
+Crucially, notice that that no single adversary fully realizes the privacy cost of the rule $\Gamma$. The privacy cost of the rule $\Gamma$ is in fact realized by a family of adversaries that minimize the false negative rate for every given confidence level. It turns out that the maximum privacy cost of the rule $\Gamma$ for a given confidence level occurs when the adversary first plays the best move for this confidence level, observes the outcome, then depending on the likelihood of having observed this outcome recursively chooses its remaining strategy tuned to maximize the overall privacy cost. Note that by $\lambda$ we mean the empty sequence.
+
+\begin{lemma}
+	\label{lemma:restricted_adversary}
+	Let $\Gamma$ be a rule of length $k$. If $k = 1$, then $\pld(\Gamma) = \sup{\Gamma(\lambda)}$ and, for $k > 1$, we have
+	\begin{align*}
+		\pld(\Gamma) = \sup\{L \oplus \pld(\Gamma_L) : L \in \Gamma(\lambda)\}
+	\end{align*}
+	where $\Gamma_{L_0}(L_1, \dots, L_{k'}) := \Gamma(L_0, L_1, \dots L_{k'})$ denotes the rule of length of $k - 1$ that fixes the first move to $L_0$.
+\end{lemma}
+
+\section{Characterizing the Natural Filter}
+\label{sec:natural_filter_characterization}
+
+Our goal is to study when the natural filter \Cref{alg:natural_filter} with budget $B$ and queries in $\cL$ comes at no additional privacy cost, i.e. the mechanism induced by the interaction between the filter and an adversarial analyst itself has privacy bounded by $B$. In this case, we say that the natural filter is free. For simplicity, we will assume that $\Iddist \in \cL$. We also denote by $\cL^\infty$ the closure of $\cL$ under convolution.
+
+\begin{algorithm}[tb]
+	\caption{NaturalFilter}
+	\label{alg:natural_filter}
+	\begin{algorithmic}
+		\REQUIRE Privacy budget $B$, analyst $\cA$, family of allowed PLDs $\cL$, query capacity $k$, dataset $D$
+		\FOR{$i = 1, \dots, k$}
+			\STATE $\cA$ gives mechanism $\cM_i$ that has PLD $L_i \in \cL$ \algcomment{can depend on previous results $Y_{<i}$}
+			\IF{$L_1 \oplus \dots \oplus L_i \preceq B$ and no $Y_j = \bot, j < i$}
+				\STATE $\cA$ receives $Y_i \sim \cM_i(D)$
+			\ELSE
+				\STATE $\cA$ receives $Y_i = \bot$
+			\ENDIF
+		\ENDFOR
+		\RETURN $(Y_1, \ldots, Y_k)$
+	\end{algorithmic}
+\end{algorithm}
+
+Now, notice that the natural filter \Cref{alg:natural_filter} with budget $B$ and $k$ queries in $\cL$ is free exactly when $\pld(\Filter_{\cL, B, k}) \preceq B$ where
+\begin{align*}
+	\Filter_{\cL, B, k}(L_1, \dots, L_{k'})
+		:= \{L_{k' + 1} \in \cL : L_1 \oplus \dots \oplus L_{k'} \oplus L_{k' + 1} \preceq B\}
+\end{align*}
+for $0 \leq k' < k$. In particular, by applying \Cref{lemma:restricted_adversary} to the rule $\Filter_{\cL, B, k}$ we immediately get the following characterization.
+
+\begin{theorem}
+	\label{thm:free_natural_filter}
+	Let $\cL$ be a family of PLDs, $B$ a PLD, and $k > 0$. For any $L_1, \dots, L_{i} \in \cL$, let
+	\begin{align*}
+		V_{k - i}(L_1, \dots, L_{i}) := \sup\{L_{i + 1} \oplus V_{k - (i + 1)}(L_1, \dots, L_{i + 1}) : L_{i + 1} \in \cL, L_1 \oplus \dots \oplus L_{i + 1} \preceq B\}
+	\end{align*}
+	where $V_0(L_1, \dots, L_k) := \Iddist$. The natural filter for $k$ queries in $\cL$ with budget $B$ is free iff $V_k(\lambda) \preceq B$.
+\end{theorem}
+
+Informally, $V_{k - i}(L_1, \dots, L_{i})$ is the maximal remaining privacy cost of an adversary that has already played moves $L_1, \dots, L_{i}$. Naturally, when the adversary has already selected all of its moves, the remaining privacy cost is $\Iddist$, i.e. nothing.
+
+It is also of interest to understand when a given family of queries $\cL$ simultaneously admits free natural filters against an arbitrary budget $B$. It turns out that this is the case exactly when the supremum commutes with the convolution operator.
+
+\begin{theorem}
+	\label{thm:universal_free_natural_filter}
+	Fix a family of PLDs $\cL$ and a query capacity $k$. The natural filter \Cref{alg:natural_filter} is free for choices of budgets $B$ if and only if
+	\begin{align*}
+		\forall L \in \cL \ \textrm{and} \ \cL' \subseteq \cL^{\infty} \quad
+			L \oplus \sup{\cL'} = \sup\{L \oplus L' : L' \in \cL'\}.
+	\end{align*}
+\end{theorem}
+
+Our key result is that that this commutativity condition can essentially only be satisfied when $\cL^\infty$ is well-ordered.
+
+\begin{theorem}
+	\label{thm:well_ordering}
+	Fix a family of non-degenerate PLDs $\cL$, i.e. every $L \in \cL$ is supported at at least two points in $\bR$. The natural filter \Cref{alg:natural_filter} is free for every budget $B$ and every query capacity $k$ if and only if $\cL^\infty$ is well-ordered with respect to $\preceq$.
+\end{theorem}
+
+It is straightforward to show that families of queries that are well-ordered under composition satisfy the commutativity condition of \Cref{thm:universal_free_natural_filter}. The reverse direction is significantly more challenging. The key technical idea is that any PLD whose support can be shifted to hit gaps between other PLDs causes those gaps to align when composed. By analyzing the topology of a pair of privacy profiles that are not well-ordered, one can show that this support shifting condition is satisfied.
+
+\section{Notable Implications}
+\label{sec:implications}
+
+In the following, let $\cL_{\textrm{all}}$ be the set of all PLDs, let $\cL_{(\eps, \delta)}$ denote the set of all $(\eps, \delta)$-DP PLDs ($\eps \geq 0, \delta \in [0, 1]$), let $\cL_{(0, \delta)}$ be the family of $(0, \delta)$-DP PLDs ($\delta \in [0, 1]$), and let $\cL_{\textrm{gdp}}$ be the set of all $\mu$-GDP PLDs.
+
+\subsection{Natural filters are NOT Free in General}
+
+Because PLDs are not well-ordered in general, an immediate implication of \Cref{thm:well_ordering} is that there are no free natural filters in general. This is true even for $(\eps, \delta)$-DP queries and budgets.
+
+\begin{corollary}
+	The natural filter for queries in $\cL_{(\eps, \delta)}$ is not free even when the budget belongs to $\cL_{(\eps, \delta)}$.
+\end{corollary}
+
+One can also show by a simple numerical counterexample that the conditions of \Cref{thm:free_natural_filter} fail for arbitrary queries GDP budgets.
+
+\begin{corollary}
+	The natural filter for queries in $\cL_{\textrm{all}}$ is not free even when the budget is restricted to $\cL_{\textrm{gdp}}$.
+\end{corollary}
+
+\subsection{Families of Mechanisms with Free Filters}
+
+Some families of queries that are closed under convolution and well-ordered do satisfy \Cref{thm:well_ordering}.
+
+\begin{corollary}
+	The natural filter for queries in $\cL_{\textrm{gdp}}$ is free for any budget.
+\end{corollary}
+
+\begin{corollary}
+	The natural filter for queries in $\cL_{(0, \delta)}$ is free for any budget.
+\end{corollary}
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
 \end{document}
