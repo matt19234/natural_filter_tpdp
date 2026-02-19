@@ -1,0 +1,191 @@
+\section{Prelims}
+
+For shorthand, we denote by $\pld(M) := \pld(M(D_1) \parallel M(D_2))$ the PLD of a mechanism $M$. Note that a distribution can be easily recognized as a PLD as follows.
+
+\begin{proposition}
+    A distribution $L$ on $\bR \cup \{\infty\}$ is the PLD of some $(P, Q$) if and only if it satisfies $\E_{Z \sim L}[e^{-Z}] \leq 1$. In this case, one such pair is $(L, L')$ where $L'$ is the Esscher tilt of $L$, namely $dL'(z) := e^{-z} dL(z)$ for $z \in \bR$ and $L'(\{-\infty\}) := 1 - \E_{Z \sim L}[e^{-Z}]$.
+\end{proposition}
+
+PLDs also inherit the Blackwell order: For PLDs $L$ and $L'$, we say that $L \preceq L'$ if there exist pairs $(P, Q)$ and $(P', Q')$ such that $L := \pld(P \parallel Q)$, $L' = \pld(P' \parallel Q')$, and $(P, Q) \preceq (P', Q')$. It is straightforward to show that this order is well-defined regardless of the underlying representations $(P, Q)$ and $(P', Q')$.
+
+PLDs also form a commutative monoid under convolution that is monotone in the Blackwell order.
+
+\begin{proposition}
+    \label{prop:pld_convolution_properties}
+    For any PLDs $L_1, L_2, L_3, L'_1, L'_2$,
+    \begin{enumerate}
+        \item The convolution $L_1 \oplus L_2$ is also a PLD;
+        \item The identically zero distribution $\Iddist$ is a PLD such that $L_1 \oplus \Iddist = \Iddist \oplus L_1 = L_1$;
+        \item $(L_1 \oplus L_2) \oplus L_3 = L_1 \oplus (L_2 \oplus L_3)$;
+        \item $L_1 \oplus L_2 = L_2 \oplus L_1$; and
+        \item If $L_1 \preceq L'_1$ and $L_2 \preceq L'_2$, then $L_1 \oplus L_2 \preceq L'_1 \oplus L'_2$.
+    \end{enumerate}
+\end{proposition}
+
+A highly prized property of PLDs is that the privacy characteristics of an adaptive mechanism corresponds to convolution of PLDs, provided that each component fixes a privacy budget in advance. This is important because the convolution of a long sequence of distributions can be computed very efficiently by applying the fast Fourier transform \cite{koskela2020computing}. Note that we will require more than this to understand fully adaptive composition where the privacy bound of each component is itself adaptive.
+
+\begin{proposition}
+    \label{prop:composition_convolution}
+    Let $M_1 : \cD \to \cY_1$ and $M_2 : \cD \times \cY_1 \to \cY_2$ be adaptive mechanisms such that $\pld(M_1) \preceq L_1$ and $\pld(M_2(\cdot; y_1)) \preceq L_2$ for every $y_1 \in \cY_1$. Then $\pld(M_1 \otimes M_2) \preceq L_1 \oplus L_2$. Moreover, if $\pld(M_1) \preceq \pld(M'_1)$ and $\pld(M_2(\cdot; y_1)) \preceq \pld(M'_2(\cdot; y_1))$ for every $y_1 \in \cY_1$, then $\pld(M_1 \otimes M_2) \preceq \pld(M'_1 \otimes M'_2)$.
+\end{proposition}
+
+Closely related to the PLD is the hockey-stick curve: a convex reparameterization of the privacy profile of a mechanism generalizing the classical notion of $(\eps, \delta)$-DP.
+
+\begin{definition}
+    For a pair of distributions $(P, Q)$ over $\Omega$, their hockey-stick divergence at order $x \in \bR^\times := (0, \infty)$ is
+    \begin{align*}
+        H_x(P \parallel Q) := \sup_{E \subseteq \Omega} P(E) - xQ(E).
+    \end{align*}
+\end{definition}
+
+Again, for convenience, we write $H_x(M) := H_x(M(D_1) \parallel M(D_2))$ and sometimes $h_M(x) := H_x(M)$ for the hockey-stick curve of a mechanism $M$. We will rely on hockey-stick curves in order to reason about adversarial behaviour of adaptive mechanisms. The hockey-stick curve is very closely related to the classical $(\eps, \delta)$ form of differential privacy. In particular, by construction of the hockey-stick divergence a mechanism $M$ satisfies $(\eps, \delta)$-DP exactly when $H_{e^\eps}(M) \leq \delta$. In general, hockey-stick curves are characterized by a few simple conditions.
+
+\begin{proposition}[\cite{ZhuDW22} Lemma 9]
+    \label{prop:hs_characterization}
+    A curve $h : \bR^\times \to [0, 1]$ is a hockey-stick curve of some pair $(P, Q)$ if and only if $h$ is convex and decreasing such that $\lim_{x \to 0}h(x) = 1$ and $h(x) \geq 1 - x$ for all $x \in \bR^\times$.
+\end{proposition}
+
+Hockey-stick curves are also closely related to PLDs and can be fully recovered from the PLD via the following formula.
+
+\begin{proposition}
+    \label{prop:pld_to_hs}
+    For any mechanism $M$ and $x \in \bR^\times$,
+    \begin{align*}
+        h_M(x) = \E_{Z \sim \pld(M)}[(1 - xe^{-Z})_+]
+    \end{align*}
+    where $(t)_+ := \max\{0, t\}$.
+\end{proposition}
+
+\begin{proof}
+    For any pair $(P, Q)$ defined on $\Omega$ with likelihood ratio $\ell$, we have that
+    \begin{align*}
+        H_x(P \parallel Q)
+            & = \sup_{E \subseteq \Omega} P(E) - xQ(E) \\
+            & = \sup_{E \subseteq \Omega} \int_E \frac{d(P - xQ)}{dP}(\omega) \, dP(\omega) \\
+            & = \sup_{E \subseteq \Omega} \int_E 1 - x/\frac{dP}{dQ}(\omega) \, dP(\omega) \\
+            & = \int_\Omega \left(1 - x/\frac{dP}{dQ}(\omega)\right)_+ \, dP(\omega) \\
+            & = \int_\Omega (1 - xe^{-\log(\ell(\omega))})_+ \, dP(\omega) \\
+            & = \E_{Z \sim \pld(P \parallel Q)}[(1 - xe^{-Z})_+].
+    \end{align*}
+\end{proof}
+
+For convenience, we will sometimes write $h_L$ to denote the unique hockey-stick curve associated to a PLD $L$, namely $h_L(x) := \E_{Z \sim L}[(1 - xe^{-Z})_+]$. Moreover, like PLDs, hockey-stick curves also capture adaptive composition in a natural way.
+% Doing so computationally involves expensive numerical integration and is not generally practical.
+% \todo{explain that it's useful anyway 'cause the formula is more flexible than for plds}
+
+\begin{proposition}
+    \label{prop:hockey_stick_composition}
+    Let $M_1 : \cD \to \cY_1$ and $M_2 : \cD \times \cY_1 \to \cY_2$ be adaptive mechanisms and let $\ell^1 := \frac{dM_1(D_1)}{dM_1(D_2)}$ denote the likelihood ratio for $M_1$. Then
+    \begin{align*}
+        h_{M_1 \otimes M_2}(x) = \E_{Y_1 \sim M_1(D_1)}[h_{M_2(\cdot; Y_1)}(x/\ell^1(Y_1))].
+    \end{align*}
+\end{proposition}
+
+\begin{proof}
+    Let $\ell$ denote the likelihood ratio for $M_1 \otimes M_2$ and let $\ell^2_{y_1}$ denote the likelihood ratio for $M_2(\cdot; y_1)$. By Bayes' rule, we have $\ell(y_1, y_2) = \ell^1(y_1) \cdot \ell^2_{y_1}(y_2)$, so we have
+    \begin{align*}
+        \pld(M_1 \otimes M_2) \equiv \log(\ell^1(Y_1)) + \log(\ell^2_{Y_1}(Y_2)), Y_1 \sim M_1(D_1), Y_2 \sim M_2(D_1; Y_1).
+    \end{align*}
+    By \Cref{prop:pld_to_hs} and the law of total expectation, it follows that
+    \begin{align*}
+        h_{M_1 \otimes M_2}(x)
+            & = \E_{Z \sim \pld(M_1 \otimes M_2)}[
+                        (1 - xe^{-Z})_+
+                    ] \\
+            & = \E_{Y_1 \sim M_1(D_1)}[\E_{Y_2 \sim M_2(D_1; Y_1)}[
+                        (1 - xe^{-(\log(\ell^1(Y_1)) + \log(\ell^2_{Y_1}(Y_2)))})_+
+                    ]] \\
+            & = \E_{Y_1 \sim M_1(D_1)}[\E_{Y_2 \sim M_2(D_1; Y_1)}[
+                        (1 - x/\ell^1(Y_1) \cdot e^{-\log(\ell^2_{Y_1}(Y_2))})_+
+                    ]] \\
+            & = \E_{Y_1 \sim M_1(D_1)}[\E_{Z_2 \sim \pld(M_2(\cdot; Y_1)}[
+                        (1 - x/\ell^1(Y_1) \cdot e^{-Z_2})_+
+                    ]] \\
+            & = \E_{Y_1 \sim M_1(D_1)}[h_{M_2(\cdot; Y_1)}(x/\ell^1(Y_1))].
+    \end{align*}
+\end{proof}
+
+Our last characterization of privacy is given the Type I/Type II error tradeoff curve, also known as the $f$-DP framework of privacy \cite{DongRS19}.
+
+\begin{definition}
+    Let $(P, Q)$ be any distributions on $\Omega$. For any hypothesis test $\phi : \Omega \to \{P, Q\}$ for distinguishing $P$ and $Q$, we call $\alpha_\phi := \bP_{\omega \sim P}[\phi(\omega) = Q]$ its Type I error and $\beta_\phi := \bP_{\omega \sim Q}[\phi(\omega) = P]$ its Type II error. The tradeoff curve for $(P, Q)$ is defined as
+    \begin{align*}
+        T_\alpha(P \parallel Q) := \inf_{\phi} \{\beta_\phi : \alpha_\phi \leq \alpha\}.
+    \end{align*}
+\end{definition}
+
+For convenience, we sometimes write the tradeoff curve of a mechanism $M$ with respect to the fixed dataset pair $(D_1, D_2)$ as $T_\alpha(M) := T_\alpha(M(D_1) \parallel M(D_2))$ or sometimes as $\tau_M(\alpha) := T_\alpha(M)$ where appropriate. In general, we can characterize valid tradeoff curves as follows.
+
+\begin{proposition}[\cite{DongRS19} Proposition 2.2]
+    \label{prop:tradeoff_characterization}
+    A curve $\tau : [0, 1] \to [0, 1]$ is a tradeoff curve for some testing problem $(P, Q)$ exactly when $\tau$ is continuous, convex, decreasing, and $\tau(\alpha) \leq 1 - \alpha$ for all $\alpha \in [0, 1]$.
+\end{proposition}
+
+Like hockey-stick curves, it is enough to understand the PLD of a testing problem in order to obtain its tradeoff curve. The following formula can be derived by the well-known Neyman--Pearson lemma.
+
+\begin{proposition}
+    \label{prop:pld_to_tradeoff}
+    Let $(P, Q)$ be a pair of distributions with tradeoff curve $\tau(\alpha) := T_\alpha(P \parallel Q)$ and let $F$ denote the CDF of $\pld(P \parallel Q)$. Then
+    \begin{align*}
+        \tau(\alpha) = \mathbb{E}_{Z \sim \pld(P \parallel Q)}[1(F(Z) > \alpha) \cdot e^{-Z}]
+    \end{align*}
+\end{proposition}
+
+It is common to represent a pair of distributions by either their hockey-stick curve or their tradeoff function. We show that there is a natural link between these representations via inversion and convex conjugacy. For a tradeoff function $\tau$ of a testing problem $(P, Q)$, we write $\tau^{-1}(\beta) := \inf\{\alpha \in [0, 1] : \tau(\alpha) \leq \beta\}$ for its inverse, namely the tradeoff curve for the testing problem $(Q, P)$. For a convex function $g$, we denote its convex conjugate by $g^*(y) := \sup_{x \in \mathbb{R}} xy - g(x)$. Note that we can extend tradeoff functions to the real-line by setting them to $\infty$ outside their support $[0, 1]$. Note that a special case of the following formula appears in \cite{DongRS19} (Prop 2.12) for symmetric tradeoff functions but this generalization is new to the best of our knowledge.
+
+\begin{proposition}
+    \label{prop:tradeoff_to_hs}
+    Let $(P, Q)$ be a pair of distributions with tradeoff function $\tau(\alpha) := T_\alpha(P \parallel Q)$ and hockey-stick curve $h(x) := H_x(P \parallel Q)$. Then
+    \begin{align*}
+        h(x) = 1 + (\tau^{-1})^*(-x)
+    \end{align*}
+\end{proposition}
+
+% \matt{note: for now the proof skips lots of little details, mostly relating to edge cases involving point masses and how it affects $\tau^{-1}$, $F_L^{-1}$ etc.}
+
+\begin{proof}
+    First, let $L$ denote the PLD of $(P, Q)$ and let $F$ be its CDF. By \Cref{prop:pld_to_tradeoff},
+    \begin{align*}
+        \tau(\alpha) = \mathbb{E}_{Z \sim L}[1(Z > F^{-1}(\alpha)) \cdot e^{-Z}].
+    \end{align*}
+    Therefore, by \Cref{prop:pld_to_hs}
+    \begin{align*}
+        h(x)
+            & = \mathbb{E}_{Z \sim L}[(1 - x e^{-Z})_+] \\
+            & = \mathbb{E}_{Z \sim L}[1(Z > \log(x)) \cdot \underbrace{(1 - x e^{-Z})}_{> 0 \iff Z > \log(x)}] \\
+            & = \sup_{\varepsilon \in \mathbb{R}}\mathbb{E}_{Z \sim L}[1(Z > \varepsilon) \cdot (1 - x e^{-Z})] \\
+            & = \sup_{\alpha \in [0, 1]}\mathbb{E}_{Z \sim L}[1(Z > F^{-1}(\alpha)) \cdot (1 - x e^{-Z})] \\
+            & = \sup_{\alpha \in [0, 1]} 1 - \alpha - x\tau(\alpha) \\
+            & = \sup_{\beta \in [0, 1]} 1 - \tau^{-1}(\beta) - x \beta \tag{$\alpha = \tau^{-1}(\beta)$} \\
+            & = 1 + (\tau^{-1})^*(-x).
+    \end{align*}
+\end{proof}
+
+It follows as a natural consequence that the Blackwell order on pairs, the ordering induced by the tradeoff function, as well as the hockey-stick induced ordering are all equivalent.
+
+\begin{proposition}
+    \label{prop:f-hs-equivalence}
+    Let $(P, Q)$ and $(P', Q')$ be pairs of distributions with tradeoff functions $\tau$ and $\tau'$ respectively as well as hockey-stick curves $h$ and $h'$ respectively. The following are equivalent
+    \begin{enumerate}[(i)]
+        \item $(P, Q) \preceq (P', Q')$
+        \item $\tau \succeq \tau'$
+        \item $h \preceq h'$
+    \end{enumerate}
+\end{proposition}
+
+The equivalence of (i) and (ii) is given by a celebrated theorem of Blackwell \cite[Theorem 10]{Bla51}. As for the equivalence of (ii) and (iii), this now follows by applying Fenchel–Moreau duality to \Cref{prop:tradeoff_to_hs} and recalling that convex conjugation is an order-reversing operation.
+
+As a consequence, it turns out that PLDs endowed with the Blackwell order possess the same remarkable completeness property that enables analysis in the real numbers.
+
+\begin{proposition}\label{prop:sup-conv}
+    For any non-empty family of PLDs $\mathcal{L}$ dominated by at least one PLD, there exists a unique PLD $\sup \mathcal{L}$ that dominates $\mathcal{L}$ but is dominated by every upper bound for $\mathcal{L}$. In this case,
+    \begin{enumerate}[(i)]
+        \item $h_{\sup \mathcal{L}}(x) = \sup\{h_L(x) : L \in \mathcal{L}\}$
+        \item $\tau_{\sup \mathcal{L}} = \conv\{\tau_L : L \in \mathcal{L}\}$
+    \end{enumerate}
+    where $(\conv{\cF})(\alpha) := \sup\{f(\alpha) : f \text{ is convex}, f \preceq \cF\}$ denotes the lower convex envelope.
+\end{proposition}
+
+This result follows immediately from \Cref{prop:f-hs-equivalence} and from noticing that the properties characterizing hockey-stick curves (see \Cref{prop:hs_characterization}) are all closed under pointwise suprema. Part (ii) follows from noticing that all of the properties of tradeoff curves (see \Cref{prop:tradeoff_characterization}) are also closed under the lower convex envelope operation.
+
+We rely on the supremum extensively in order to reason about natural privacy filters. In particular, the former characterization says that the supremum of PLDs is given by a pointwise supremum in the space of hockey-stick curves, which will be particularly useful for showing our main result. As far as we are aware, the supremum property of PLDs has not actually been documented in the literature.

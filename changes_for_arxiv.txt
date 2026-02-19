@@ -1,0 +1,13 @@
+- update Alg 1,2
+- merge intro
+- fix thm 2 quantification of k
+- define $\cL^{< k}$
+- i = k'
+- sensitive personal -> sensitive
+
+================
+n{proof}
+-       First, assume that the natural filter is free for every budget $B$ and for any query capacity. Now, let $L \in \cL$ and $\cL' \subseteq \cL^{<k}$. For every $L' \in \cL'$, we have $L \oplus L' \preceq L \oplus L \oplus \sup{\cL'}$ by \Cref{prop:pld_convolution_properties} and hence $\sup\{L \oplus \cL'\} \preceq L \oplus \sup{\cL'}$. As for the reverse inequality, consider the rule
++       First, assume that the natural filter is free for every budget $B$ and for any query capacity. Now, let $L \in \cL$ and $\cL' \subseteq \cL^{<k}$. For every $L' \in \cL'$, we have $L \oplus L' \preceq L \oplus \sup{\cL'}$ by \Cref{prop:pld_convolution_properties} and hence $\sup\{L \oplus \cL'\} \preceq L \oplus \sup{\cL'}$. As for the reverse inequality, consider the rule
+================
+

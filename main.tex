@@ -10,12 +10,7 @@
 \usepackage{amsfonts}
 \usepackage{url}
 \usepackage{enumerate}
-% \usepackage{natbib}
-% \bibliographystyle{abbrvnat}
-% \setcitestyle{authoryear,open={((},close={))}} %Citation-related commands
-
 \usepackage{subcaption}
-
 \usepackage{bm}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc} % allow utf-8 input
@@ -33,31 +28,6 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows.meta}
-
-\usepackage[utf8]{inputenc}
-\usepackage[style=alphabetic,maxalphanames=4,minalphanames=3, maxbibnames=10, backend=biber, natbib=true]{biblatex}
-\addbibresource{refs/zotero_export.bib}
-\addbibresource{refs/manual_refs.bib}
-\addbibresource{refs/biblio.bib}
-
-\DeclareSourcemap{
-	\maps[datatype=bibtex, overwrite]{
-		\map{
-			% For any entry of type 'article'...
-			\pertype{article}
-			% ...find the 'urldate' field and remove it.
-			\step[fieldset=urldate, null]
-		}
-		\map{
-			\pertype{inproceedings}
-			\step[fieldset=urldate, null]
-		}
-		\map{
-			% For any entry that has an `eprint' field
-			\step[fieldsource=eprint,fieldset=urldate, null]
-		}
-	}
-}
 
 \input{notations}
 
@@ -88,11 +58,15 @@
 	\input{sections/prelims}
 	\input{sections/adversary_theory}
 	\input{sections/natural_filter_characterization}
-	\input{sections/implications_special_cases}
+	\input{sections/special_cases}
 	% \input{sections/pld_filter_bound}
-	\input{sections/well_ordering_proof}
 
-	\printbibliography
+	\bibliographystyle{plain}
+	\bibliography{bibliography}
 
-	\input{sections/appendix}
+	% \appendix
+	% \input{sections/prelims_app}
+	% \input{sections/adversary_theory_app}
+	% \input{sections/well_ordering_proof}
+	% \input{sections/special_cases_app}
 \end{document}

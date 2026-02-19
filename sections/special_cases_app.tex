@@ -1,0 +1,239 @@
+\section{$f$-DP Results, Proofs and Special Cases}
+
+All examples also apply to PLD by \Cref{prop:f-hs-equivalence}, but we visualize them using trade-off curves.
+%
+For examples and visualizations, we work with piece-wise linear tradeoff curves, which can be composed exactly using the following result.
+
+\begin{proposition}[Exact composition of piecewise-linear tradeoff curves]
+\label{prop:piecewise-linear-composition}
+    Consider two piecewise-linear tradeoff curves $f_1, f_2$. 
+    Denote $\alpha_{i, n_i} \in [0,1]$ the lengths of intervals over which $f_i$ is linear, 
+    and $f'_{i,n_i} \leq 0$ the slope of $f_i$ on those intervals. 
+    Denote $\delta_i \triangleq 1-f_i(0)$.
+    
+    That is, $\sum_{j=1}^{n_i} \alpha_{i, j} = 1$, and, noting $m_i(\alpha) = \arg\max_{n: \in \{1, n_i\}} \sum_{j=1}^{n} \alpha_{i,j} \leq \alpha$, we have:
+    \[
+        f_i(\alpha) = 1 - \delta_i + \sum_{j=1}^{m_i(\alpha)} f'_{i,j} \alpha_{i,j} + 
+            \big(\alpha - \sum_{j=1}^{m_i(\alpha)} \alpha_{i,j} \big) f'_{i, j+1}.
+    \]
+
+    Let $k \in [1, n_1 n_2]$ index all combinations of $(j_{1, k}, j_{2,k}) \in [1, n_1] \times[1, n_2]$ 
+    in order of increasing values of $-f'_{1,j_{1,k}}f'_{2,j_{2,k}}$. 
+    That is, $k$ indexes all products of a slope from $f_1$ and a slope for $f_2$ 
+    (which are now positive) sorted in decreasing order of magnitude. 
+    With ne minus sign, the first index is thus the steepest negative slope.
+    
+    Then the composition $f \triangleq f_1 \otimes f_2$ is also a piecewise linear tradeoff curve, 
+    with $\delta = \delta_1 + \delta_2 - \delta_1\delta_2$, and $\alpha_k = \alpha_{1,k}\alpha_{2,k}$ 
+    and slopes $f'_k = -f'_{1,j_{1,k}}f'_{2,j_{2,k}}$. 
+    That is, denoting $m(\alpha) = \arg\max_{k: \in \{1, n_1n_2\}} \sum_{k=1}^{n} \alpha_k \leq \alpha$, 
+    $f = f_1 \otimes f_2$ is such that:
+    \[
+        f(\alpha) = 1 -\delta_1 - \delta_2 + \delta_1\delta_2 + 
+            \sum_{j=1}^{m(\alpha)} f'_k \alpha_k + 
+            \big(\alpha - \sum_{j=1}^{m(\alpha)} \alpha_k \big) f'_{k+1}.
+    \]
+\end{proposition}
+\begin{proof}
+    See \Cref{sec:proof-piecewise-linear}.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We present additional results focusing on $f$-DP, which we use to instantiate our main results \Cref{thm:free_natural_filter,thm:universal_free_natural_filter,thm:well_ordering} on special cases, that may help with intuition. For completeness, \Cref{alg:fdp_natural_filter} states the privacy filter algorithm for $f$-DP, and is a direct analogy to \Cref{alg:natural_filter}.
+
+\begin{algorithm}[tb]
+	\caption{NaturalFilter ($f$-DP)}
+	\label{alg:fdp_natural_filter}
+	\begin{algorithmic}
+		\REQUIRE Privacy bound $f$, adversary (or analyst) $\cA$, family of tradeoff curves $\cF$, query capacity $k$
+		\STATE $i=0$
+		\WHILE{$\cA$ continues and $i < k$}
+		\STATE $i \leftarrow i+1$
+		\STATE $\cA$ gives mechanism $\cM_i$ that is $f_i$-DP, with $f_i \in \cF$ \algcomment{can depend on previous results $Y_{<i}$}
+		\IF{$f_1 \otimes \ldots \otimes f_i \geq f$}
+		\STATE $\cA$ receives $Y_i \sim \cM_i$
+		\ENDIF
+		\ENDWHILE
+		\RETURN $(Y_1, \ldots, Y_i)$
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{Proof of \Cref{prop:piecewise-linear-composition}}\label{sec:proof-piecewise-linear}
+
+\begin{proof}
+	For each $i \in \{1,2\}$, let $f_i$ be a tradeoff curve with $n_i$ linear segments and $f_i(0) =1 -\delta_i$.  Each linear segment $j \in [n_i]$ has a slope $f'_{i,j} \le 0$ over an interval $[\alpha_{i,j}, \alpha_{i,j+1})$.
+	%the last linear segment has a slope $f'_{i,n_i}$ over an interval $[\alpha_{i,n_i}, \alpha_{i,n_i+1}]$. 
+	The width of   interval $j$ is  denoted by $w_{i,j} $. We also assume $-f'_{i,1} \ge -f'_{i,2 }\ge \cdots \ge -f'_{i,n_i } $.
+	Note that we have $\alpha_{i,1} = 0$, $\alpha_{i,n_i +1} = 1$, $f_i(1) = 0$, and $\sum_{j =1}^{n_i}w_{i,j} = 1$.
+	%We also have $\bigcup_{j=1}^{n_i} [\alpha_{i,j}, \alpha_{i,j+1}) \bigcup \{1 \} = [0,1]$. 
+
+	For each $i \in \{1,2 \}$, we construct a probability distribution $Q_i$ supported by $[0,1]$ with density function as follows:
+	\begin{equation}
+		 q_i(x) = \begin{cases}
+		  -f'_{i,1}, & \text{if } x \in [\alpha_{i,1}, \alpha_{i,2}),\\
+		   -f'_{i,2}, & \text{if }  x \in [\alpha_{i,2}, \alpha_{i,3}), \\
+			\vdots & \\
+		   -f'_{i,j}, & \text{if }  x \in [\alpha_{i,j}, \alpha_{i,j+1}), \\
+			\vdots & \\
+		   -f'_{i,n_i}, & \text{if }  x \in [\alpha_{i,n_i}, \alpha_{i,n_i+1}),\\
+		   (1-f_i(0)) \cdot \delta(x-1),  & \text{if }  x = \alpha_{i,n_i+1}.
+		\end{cases} 
+	\end{equation}
+	Let $P$ be the uniform distribution over $[0,1]$. Now, we show that $T(P,Q_i) = f_i$.
+
+	When $\alpha \in [\alpha_{i,1}, \alpha_{i,2})$, the optimal rejection rule is
+	\begin{equation*}
+		 \phi(x) = \begin{cases}
+		  \alpha/w_{i,1}, & \text{if }  x \in [\alpha_{i,1}, \alpha_{i,2}),\\
+		  1, & \text{if } x = 1, \\
+		  0, & \text{otherwise}.
+		\end{cases} 
+	\end{equation*}
+	Note that the type I error is $\mathbb{E}_P[\phi] = \alpha = c \cdot w_{i,1}$. The type II error is 
+	\begin{equation*}
+		\begin{array}{l}
+			1- \mathbb{E}_{Q_i}[\phi] =  1 -c \cdot w_{i,1} \cdot (-f'_{i,1}) -  (1-f_i(0)) = f_i(0) +\alpha f'_{i,1} = f_i(\alpha)= T(P,Q_i)(\alpha).
+		\end{array}
+	\end{equation*}
+
+	When $\alpha \in [\alpha_{i,2}, \alpha_{i,3})$, the optimal rejection rule is 
+	\begin{equation*}
+		 \phi(x) = \begin{cases}
+		  1, & \text{if }  x \in [\alpha_{i,1}, \alpha_{i,2}) \bigcup \{1\},\\
+			 c, & \text{if }  x \in [\alpha_{i,2}, \alpha_{i,3}),\\
+		  0, & \text{otherwise}.
+		\end{cases} 
+	\end{equation*}
+	Note that the type I error is $\mathbb{E}_P[\phi] = \alpha = w_{i,1} + c \cdot w_{i,2}$.  The type II error is 
+	\begin{equation*}
+		\begin{array}{l}
+			1- \mathbb{E}_{Q_i}[\phi] =  f_i(0) -     w_{i,1} \cdot (-f'_{i,1}) - c \cdot w_{i,2} \cdot (-f'_{i,2}) = f_i(0)+w_{i,1} \cdot  f'_{i,1} + (\alpha - w_{i,1})  f'_{i,2}  = f_i(\alpha)=T(P,Q_i)(\alpha).
+		\end{array}
+	\end{equation*}
+
+	More generally, when $\alpha \in [\alpha_{i,j}, \alpha_{i,j+1})$, the optimal rejection rule is 
+	\begin{equation*}
+		 \phi(x) = \begin{cases}
+			  1, & \text{if }  x \in [\alpha_{i,1}, \alpha_{i,j-1}) \bigcup \{1 \},\\
+				 c, & \text{if }  x \in [\alpha_{i,j}, \alpha_{i,j+1}),\\
+			  0, & \text{otherwise}.
+		\end{cases} 
+	\end{equation*}
+	Note that the type I error is $\mathbb{E}_P[\phi] = \alpha = \sum_{s=1}^{j-1} w_{i,s} + c \cdot w_{i,j}$. The type II error is 
+	\begin{equation*}
+		\begin{array}{lll}
+			1- \mathbb{E}_{Q_i}[\phi] &= & f_i(0) -     \sum_{s=1}^{j-1}w_{i,s} \cdot (-f'_{i,s}) - c \cdot w_{i,j} \cdot (-f'_{i,j})\\
+			& = & f_i(0)+\sum_{s=1}^{j-1}w_{i,s} \cdot  f'_{i,s} + (\alpha -\sum_{s=1}^{j-1} w_{i,s})  f'_{i,j}  = f_i(\alpha)=T(P,Q_i)(\alpha).
+		\end{array}
+	\end{equation*}
+
+
+	Now, we construct a testing problem $P \times P \text{ vs } Q_1 \times Q_2 $. 
+	We first compute $(-f'_{1,k_1}) \cdot (-f'_{2,k_2})$ for all $k_1 \in [n_1]$ and $k_2 \in [n_2]$. Then, we sort all these $n_1 \cdot n_2$ values  in a non-increasing order, using $k \in [n_1 \cdot n_2]$ as the index. For a fixed $k$, we know  its respective $k_1, k_2$ and then $w_{1, k_1}, w_{2, k_2}$ and $f'_{1, k_1}, f'_{2, k_2}$.
+	Let $\tilde{w}_k := w_{1, k_1} \cdot w_{2, k_2}$ and  $\tilde{f}'_k := f'_{1, k_1} \cdot f'_{2, k_2}$.
+
+	\begin{enumerate}
+	\item When $\alpha \in \left[0, \ \tilde{w}_1 \right)$, we have the optimal rejection rule is 
+	\begin{equation*}
+		 \phi(x) = \begin{cases}
+			  1, & \text{if }  (x_1, x_2) \in [0, 1) \times \{1\} \bigcup \{1\} \times [0, 1) \bigcup \{1\} \times \{1\} \\
+			
+				 c, & \text{if }  (x_1, x_2) \in [\alpha_{1,1}, \alpha_{1,2}) \times [\alpha_{2,1}, \alpha_{2,2})  \\
+			  0, & \text{otherwise}.
+		\end{cases} 
+	\end{equation*}
+	The type I error is $\mathbb{E}_{P \times P}[\phi] = \alpha = c \cdot \tilde{w}_{1}$. The type II error is
+	\begin{equation*}
+	   \mathbb{E}_{Q_1 \times Q_2}[\phi] = \delta_1 + \delta_2 + \delta_1 \cdot  \delta_2 +
+			c \cdot \tilde{w}_{1} \cdot \tilde{f}'_{1}   =  \delta_1 - \delta_2 - \delta_1   \delta_2 -\alpha \cdot \tilde{f}'_{1}.
+	\end{equation*}
+	Therefore, we have
+	\begin{equation*}
+		\begin{array}{ll}
+			  &  T(P \times P, Q_1 \times Q_2) (\alpha) = 1- \mathbb{E}_{Q_1 \times Q_2}[\phi] =  1 - \delta_1 - \delta_2 - \delta_1   \delta_2 -\alpha \cdot \tilde{f}'_{1}.
+					\end{array}
+		\end{equation*}
+
+		\item When $\alpha \in \left[\tilde{w}_{1} , \ \tilde{w}_1 + \tilde{w}_{2} \right)$, we have
+		\begin{equation*}
+			\begin{array}{l}
+				 \alpha = \tilde{w}_{1}  + c \cdot  \tilde{w}_{2} \quad \Rightarrow c \cdot  \tilde{w}_{2}  = \alpha - \tilde{w}_1,  \\
+				 T(P \times P, Q_1 \times Q_2) (\alpha)  =  1 - \delta_1 - \delta_2 - \delta_1   \delta_2- \tilde{w}_1 \cdot \tilde{f}'_1- c \cdot \tilde{w}_2 \cdot \tilde{f}'_2 \\
+				 =  1 - \delta_1 - \delta_2 - \delta_1   \delta_2- \tilde{w}_1 \cdot \tilde{f}'_1- (\alpha - \tilde{w}_1) \cdot \tilde{f}'_2.
+			\end{array}
+		\end{equation*}
+		\item When $\alpha \in \left[ \tilde{w}_1 + \tilde{w}_2, \  \tilde{w}_1 + \tilde{w}_2 + \tilde{w}_3  \right)$, we have
+		\begin{equation*}
+			\begin{array}{l}
+				 \alpha = \sum_{s = 1}^{2}\tilde{w}_s + c \cdot \tilde{w}_3 \quad \Rightarrow c \cdot \tilde{w}_3 =  \alpha - \sum_{s = 1}^{2}\tilde{w}_s, \\
+				   T(P \times P, Q_1 \times Q_2) (\alpha) = 1 - \delta_1 - \delta_2 - \delta_1   \delta_2- \sum_{s =1}^{2} \tilde{w}_s \cdot \tilde{f}'_{s} - c \cdot \tilde{w}_3 \cdot \tilde{f}'_3 \\ =  1 - \delta_1 - \delta_2 - \delta_1   \delta_2- \sum_{s =1}^{2} \tilde{w}_s \cdot \tilde{f}'_s - (\alpha - \sum_{s=1}^2 \tilde{w}_s) \cdot   \tilde{f}'_3. 
+			\end{array}
+		\end{equation*}
+
+		\item When $\alpha \in \left[\sum_{s=1}^{j}  \tilde{w}_s , \ \sum_{s=1}^{j+1} \tilde{w}_s \right)$,  we have
+		\begin{equation*}
+			\begin{array}{l}
+				  \alpha = \sum_{s = 1}^{j}\tilde{w}_s + c \cdot \tilde{w}_{j+1} \quad \Rightarrow c \cdot \tilde{w}_{j+1} =  \alpha - \sum_{s = 1}^{j}\tilde{w}_s, \\
+					 T(P \times P, Q_1 \times Q_2) (\alpha) = 1- \delta_1 - \delta_2 - \delta_1   \delta_2- \sum_{s =1}^{j} \tilde{w}_s \cdot \tilde{f}'_{s} - c \cdot \tilde{w}_{j+1} \cdot \tilde{f}'_{j+1} \\ =  1- \delta_1 - \delta_2 - \delta_1   \delta_2- \sum_{s =1}^{j} \tilde{w}_s \cdot \tilde{f}'_s - (\alpha - \sum_{s=1}^j \tilde{w}_s) \cdot   \tilde{f}'_{j+1}.
+			\end{array}
+		\end{equation*}
+	\end{enumerate}
+\end{proof}
+
+\subsection{A Simple Derivation of \Cref{thm:well_ordering} for Approximate DP}
+\label{sec:appendix:well-ordered-eps-delt}
+
+\begin{definition}[Crossing tradeoff curves]\label{def:crossing}
+	We say that two tradeoff curves $f, g \in \cT$ cross if there exists $\alpha_1, \alpha_2 \in [0, 1]$ s.t.:
+	\[
+		f(\alpha_1) > g(\alpha_1) \ \textrm{and} \ f(\alpha_2) < g(\alpha_2) .
+	\]
+\end{definition}
+
+By continuity, there has to be $\alpha \in (\alpha_1, \alpha_2)$ s.t. $f(\alpha) = g(\alpha)$.
+For any two $(\epsilon, \delta)$-DP with tradeoff curves that cross, there cannot be free $f$-DP filters.
+
+We can now prove \Cref{prop:no-commutativity-for-eps-delta}, a special case of \Cref{thm:well_ordering} for $(\epsilon,\delta)$-DP.
+
+\begin{proof} 
+	Consider $g_1\triangleq f_{\epsilon_1, \delta_1}$ and $g_2 \triangleq f_{\epsilon_2, \delta_2}$ that cross. By symmetry w.r.t. the $y=x$ axis, they have to cross at an $\alpha < \min\{ \alpha_1^\star, \alpha_2^\star  \}$, where $\alpha_i^\star \ \textrm{s.t.} \  \alpha_i^\star = g_i(\alpha_i^\star)$ (otherwise they would never cross).
+	This means that their linear segments cross: one function starts strictly lower, and then ends-up strictly higher by $\min\{ \alpha_1^\star, \alpha_2^\star  \}$ (again, otherwise they would never cross). Without loss of generality, we reorder functions so that $g_2$ starts strictly lower.
+
+	We now know that $\delta_2 > \delta_1 \geq 0$ ($g_2$ starts lower); $\epsilon_1 > \epsilon_2 \geq 0$ ($g_1$ has a steeper slope to catch-up to $g_2$ so that they can cross); and $\alpha_2^\star > \alpha_1^\star$. The last inequality holds because $g_1$ is strictly lower by the time is crosses $y=x$ at $\alpha_1^\star$, so at that point $g_2(\alpha_1^\star) > \alpha_1^\star$, and by continuity of $g_2$ we have that $\alpha_2^\star > \alpha_1^\star$.
+	Since we are dealing with approximate DP curves, we also know that $\alpha_i^\star = \frac{1 - \delta_i}{1 + e^{\epsilon_i}}$.
+	
+	Now, in \Cref{thm:universal_free_natural_filter}, pick $\cH = \{g_1, g_2 \} \subseteq \cF$ and $g = g_1 \in \cH \subseteq \cF$.
+	We make a few useful observations about the first segment of $g_1 \otimes g_1$, $g_1 \otimes g_2$, and $g_1 \otimes \conv(g_1, g_2)$, by applying \Cref{prop:piecewise-linear-composition}:
+	
+	\noindent The first segment of $g_1 \otimes g_1$ starts at $(1-\delta_1)^2$, with slope $-e^{2\epsilon_1}$ for $\alpha \in [0, \alpha_1^{\star2}]$. The second slope is $-e^{\epsilon_1}e^{-\epsilon_1}=-1$.
+	
+	\noindent The first segment of $g_1 \otimes g_2$ starts at $(1-\delta_1)(1-\delta_2)$, with slope $-e^{\epsilon_1+\epsilon_2}$ for $\alpha \in [0, \alpha_1^\star\alpha_2^\star]$. The second slope is $-e^{\epsilon_1-\epsilon_2}<-1$.
+
+	\noindent The first segment of $\conv(g_1, g_2)$ starts at $(1-\delta_2)$ (the lowest point at $\alpha=0$), and since $g_1$ and $g_2$ cross, it meets $g_1$ at $\alpha = \alpha_1^\star$, where its value is $g_1(\alpha_1^\star) = 1 - \delta_1 - e^{\epsilon_1}\alpha_1^\star$. As a result, the first slope of $\conv(g_1, g_2)$ is $\frac{1 - \delta_1 - e^{\epsilon_1}\alpha_1^\star - (1-\delta_2)}{\alpha_1^\star} = \frac{\delta_2 - \delta_1}{\alpha_1^\star} - e^{\epsilon_1}$.
+	
+	\noindent The first segment of $g_1 \otimes \conv(g_1, g_2)$ starts at $(1-\delta_1)(1-\delta_2)$, with first slope $\frac{\delta_1 - \delta_2}{\alpha_1^\star}e^{\epsilon_1} - e^{2\epsilon_1}$ for $\alpha \in [0, \alpha_1^{\star2}]$.
+	
+
+	Let us study the first segment of $\conv(g_1 \otimes g_1, g_1 \otimes g_2)$ and compare it to that of $g_1 \otimes \conv(g_1, g_2)$. We first reason about the possible shapes of $\conv(g_1 \otimes g_1, g_1 \otimes g_2)$. We saw that $g_1 \otimes g_1(0) = (1-\delta_1)^2 > (1-\delta_1)(1-\delta_2) = g_1 \otimes g_2(0)$, so $g_1 \otimes g_2$ starts lower. Since $-e^{2\epsilon_1} < -e^{\epsilon_1 + \epsilon_2} < -e^{\epsilon_1 - \epsilon_2}$, $g_1 \otimes g_1 < -1$, we know that $g_1 \otimes g_1$ starts with a steepest slope, which stops first (at $\alpha_1^{\star2} < \alpha_1^{\star}\alpha_2^{\star}$) and then gets the smallest second slope (until at least $\alpha \geq \alpha_{g_1 \otimes g_2}^{\star}$).
+	As a result, either that first slope is steep enough such that $g_1 \otimes g_1(\alpha_1^{\star2}) < g_1 \otimes g_2(\alpha_1^{\star2})$ and the composed curves cross, or they will never cross and $g_1 \otimes g_2 \leq g_1 \otimes g_1$.
+	%
+	We treat each case in turn.
+
+	\emph{Case 1:} $g_1 \otimes g_1(\alpha_1^{\star2}) < g_1 \otimes g_2(\alpha_1^{\star2})$ and the composed curves cross (\Cref{subfig:counter-example-crossing}).
+	In that case, we know that $\conv(g_1 \otimes g_1, g_1 \otimes g_2)(\alpha_1^{\star2}) = g_1 \otimes g_1(\alpha_1^{\star2}) = (1-\delta_1)^2 - e^{2\epsilon_1} \alpha_1^{\star2}$.
+	As a result, the slope of $\conv(g_1 \otimes g_1, g_1 \otimes g_2)$ in $\alpha \in [0, \alpha_1^{\star2}]$ is $\frac{(1-\delta_1)^2 - e^{2\epsilon_1} \alpha_1^{\star2} - (1-\delta_1)(1-\delta_2)}{\alpha_1^{\star2}} = \frac{(1-\delta_1)(\delta_2 - \delta_1)}{\alpha_1^{\star2}} - e^{2\epsilon_1} = (1+e^{\epsilon_1})\frac{\delta_2 - \delta_1}{\alpha_1^{\star}} - e^{2\epsilon_1}$ (the last step uses $\alpha_i^\star = \frac{1 - \delta_i}{1 + e^{\epsilon_i}}$).
+	
+	Remember that $g_1 \otimes \conv(g_1, g_2)(0) = (1-\delta_1)(1-\delta_2) = \conv(g_1 \otimes g_1, g_1 \otimes g_2)$, and the first slope of with first slope of $g_1 \otimes \conv(g_1, g_2) = \frac{\delta_2 - \delta_1}{\alpha_1^\star}e^{\epsilon_1} - e^{2\epsilon_1} < (1+e^{\epsilon_1})\frac{\delta_2 - \delta_1}{\alpha_1^{\star}} - e^{2\epsilon_1}$ since $\delta_2 - \delta_1 > 0$.
+
+	We have shown that in this case, $g_1 \otimes \conv(g_1, g_2) > \conv(g_1 \otimes g_1, g_1 \otimes g_2)$ at least on $(0, \alpha_1^{\star2}]$, so by \Cref{thm:universal_free_natural_filter}, and there are no $f$-DP filters.
+
+	% Choosing $f=$
+	
+	\emph{Case 2:} $g_1 \otimes g_1(\alpha_1^{\star2}) \geq g_1 \otimes g_2(\alpha_1^{\star2})$ and $\conv(g_1 \otimes g_1, g_1 \otimes g_2) = g_1 \otimes g_2$ (\Cref{subfig:counter-example-not-crossing}).
+	%
+	Intuitively, we know that the first slope of $\conv(g_1, g_2)$ is steeper than that of $g_2$, since $g_2$ starts lower and crosses with $g_1$. Formally, the first slope of $g_1 \otimes \conv(g_1, g_2)$ is $\frac{\delta_2 - \delta_1}{\alpha_1^\star}e^{\epsilon_1} - e^{2\epsilon_1} = - e^{\epsilon_1} \big( e^{\epsilon_1} - \frac{\delta_2 - \delta_1}{\alpha_1^\star} \big)$. We know that $1-\delta_1-e^{\epsilon_1}\alpha_1^{\star} = g_1(\alpha_1^{\star}) < g_2(\alpha_1^{\star2}) = 1-\delta_2-e^{\epsilon_2}\alpha_1^{\star}$, so $\delta_2-\delta_1 < \alpha_1^{\star}(e^{\epsilon_1} - e^{\epsilon_2})$ and $0 < e^{\epsilon_2} < e^{\epsilon_1} - \frac{\delta_2-\delta_1}{\alpha_1^{\star}}$.
+	That is, $-e^{\epsilon_1} \big( e^{\epsilon_1} - \frac{\delta_2 - \delta_1}{\alpha_1^\star} \big) < -e^{\epsilon_1}e^{\epsilon_2}$.
+
+	In this case as well, the first slope of $g_1 \otimes \conv(g_1, g_2)$ is strictly more steep than that of $\conv(g_1 \otimes g_1, g_1 \otimes g_2)$, so $g_1 \otimes \conv(g_1, g_2) > \conv(g_1 \otimes g_1, g_1 \otimes g_2)$ at least on $(0, \alpha_1^{\star2}]$. By \Cref{thm:universal_free_natural_filter}, and there are no free $f$-DP filters.
+\end{proof}
